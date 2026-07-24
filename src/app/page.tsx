@@ -1,6 +1,8 @@
 import Image from "next/image";
 import {
+  BarChart3,
   ChevronRight,
+  Cpu,
   FileText,
   HeartHandshake,
   HeartPulse,
@@ -88,6 +90,20 @@ const serviceLinks: ServiceLink[] = [
     description: "Central de proteção à mulher",
     icon: Siren,
     url: "https://sosmulher-sermulher.aracaju.se.gov.br",
+  },
+  {
+    id: 9,
+    title: "Observatório SerMulher",
+    description: "Transparência da rede de proteção",
+    icon: BarChart3,
+    url: "/observatorio.html",
+  },
+  {
+    id: 10,
+    title: "Governo Digital · PGD-AJU",
+    description: "Programa de Governo Digital de Aracaju",
+    icon: Cpu,
+    url: "/painel-pgd-aju.html",
   },
 ];
 

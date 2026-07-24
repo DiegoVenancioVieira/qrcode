@@ -2,12 +2,14 @@ import Image from "next/image";
 import {
   ChevronRight,
   FileText,
+  HeartHandshake,
   HeartPulse,
   Landmark,
   MapPin,
   Phone,
   Receipt,
   ShieldCheck,
+  Siren,
   type LucideIcon,
 } from "lucide-react";
 
@@ -72,6 +74,20 @@ const serviceLinks: ServiceLink[] = [
     description: "Encontre unidades próximas de você",
     icon: MapPin,
     url: "https://www.aracaju.se.gov.br",
+  },
+  {
+    id: 7,
+    title: "SIGMA · SerMulher",
+    description: "Gestão do atendimento à mulher",
+    icon: HeartHandshake,
+    url: "https://sigma-sermulher.aracaju.se.gov.br",
+  },
+  {
+    id: 8,
+    title: "Patrulha Maria da Penha",
+    description: "Central de proteção à mulher",
+    icon: Siren,
+    url: "https://sosmulher-sermulher.aracaju.se.gov.br",
   },
 ];
 

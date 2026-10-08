@@ -25,6 +25,11 @@ COPY . .
 # variável de ambiente marcada como "Build Variable".
 ARG PREFEITURA=aracaju
 ENV PREFEITURA=$PREFEITURA
+# Domínio público usado nos metadados (Open Graph). O Coolify fornece
+# COOLIFY_URL; SITE_URL, se definida, tem prioridade.
+ARG COOLIFY_URL
+ARG SITE_URL
+ENV COOLIFY_URL=$COOLIFY_URL SITE_URL=$SITE_URL
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # https://nextjs.org/telemetry

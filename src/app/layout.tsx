@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
-import { prefeitura, variaveisDoTema } from "@/config/prefeitura";
+import { prefeitura, urlDoSite, variaveisDoTema } from "@/config/prefeitura";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -8,19 +8,25 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+// Sem domínio conhecido no build, a URL e a imagem de prévia ficariam
+// relativas ou apontando para localhost; nesse caso elas são omitidas.
+const urlSite = urlDoSite();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(prefeitura.site.url),
+  metadataBase: urlSite,
   title: prefeitura.site.titulo,
   description: prefeitura.site.descricao,
   icons: { icon: prefeitura.marca.favicon },
   openGraph: {
     type: "website",
-    url: "/",
+    url: urlSite ? "/" : undefined,
     title: prefeitura.site.titulo,
     description: prefeitura.site.descricao,
     siteName: prefeitura.prefeitura.nome,
     locale: prefeitura.site.idioma.replace("-", "_"),
-    images: [{ url: prefeitura.marca.logo, alt: prefeitura.marca.logoAlt }],
+    images: urlSite
+      ? [{ url: prefeitura.marca.logo, alt: prefeitura.marca.logoAlt }]
+      : undefined,
   },
 };
 

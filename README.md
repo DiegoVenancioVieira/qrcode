@@ -60,9 +60,12 @@ marcando **Build Variable**.
 | `site.idioma` | Atributo `lang` do HTML e locale do Open Graph |
 | `marca.logo` / `marca.logoAlt` | Brasão/logo do cabeçalho (caminho em `public/` ou URL) e texto alternativo |
 | `marca.favicon` | Ícone da aba do navegador |
-| `tema.primaria` | Cor da prefeitura nos tons `50`, `100`, `300`, `500` e `600` (hex) — também define a `theme-color` do navegador no celular (tom `600`) |
+| `tema.primaria` | Cor da prefeitura nos tons `50`, `100`, `300`, `500`, `600` e `700` (hex) — também define a `theme-color` do navegador no celular (tom `600`) |
 | `textos.*` | Subtítulo do cabeçalho, rótulo de acessibilidade da lista e selo do rodapé |
 | `servicos[]` | Botões do hub: `id`, `titulo`, `descricao`, `icone` e `url` |
+| `chat.habilitado` | Liga o assistente virtual (opcional; seção ausente = desligado). O botão só aparece se o servidor também tiver `AGENTE_API_URL` |
+| `chat.titulo` / `chat.rotuloBotao` | Título do painel do chat e texto do botão flutuante |
+| `chat.aviso` | Aviso de IA/privacidade abaixo do campo de digitação |
 
 O campo `icone` aceita o nome de qualquer ícone do
 [lucide](https://lucide.dev/icons) em PascalCase (ex.: `Landmark`,
@@ -96,6 +99,39 @@ modelado para ser substituído futuramente por uma coleção do **Directus**
 (CMS Headless). O carregamento e a validação ficam em
 [`src/config/prefeitura.ts`](src/config/prefeitura.ts) — basta trocar a
 leitura do JSON por uma chamada `fetch` à API mantendo o mesmo formato.
+
+## Assistente virtual (chat)
+
+O botão flutuante (`chat.rotuloBotao`) abre um chat com o Agente de FAQ
+Municipal (repo `agente_inteligente`), com seletor de secretaria — a lista vem
+do próprio agente. Textos e cor vêm da configuração da prefeitura.
+
+O botão só aparece quando as duas condições valem:
+
+1. `chat.habilitado: true` no JSON da prefeitura (lido no **build**);
+2. `AGENTE_API_URL` definida no servidor (lida em **runtime**, consultada pelo
+   widget em `GET /api/chat/status`, que não chama o agente).
+
+- `src/components/ChatWidget.tsx` — widget (client component). A conversa fica
+  só em memória, sem `localStorage`.
+- `src/app/api/chat/route.ts` — repassa `POST /api/chat` para `POST {agente}/ask`.
+- `src/app/api/chat/secretarias/route.ts` — repassa para `GET {agente}/secretarias`.
+- `src/app/api/chat/status/route.ts` — informa se este deploy tem agente.
+
+O navegador nunca fala direto com o agente: o endereço dele fica oculto e não há
+bloqueio de conteúdo misto (hub em HTTPS, agente em HTTP).
+
+Configure a variável de ambiente (veja `.env.example`):
+
+```bash
+AGENTE_API_URL=http://faq-cache:8000   # endereço interno do agente
+```
+
+Cada prefeitura aponta para o seu próprio agente. Sem a variável, o botão do
+chat não aparece. O IP do cidadão é repassado
+no `X-Forwarded-For` para o rate-limit do agente valer por pessoa; no agente,
+defina `TRUSTED_PROXIES` com as redes Docker do Traefik e do hub
+(ex.: `172.16.0.0/12,10.0.0.0/8`).
 
 ## Assets
 

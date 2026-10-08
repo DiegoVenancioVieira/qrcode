@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { ChevronRight, ShieldCheck } from "lucide-react";
+import ChatWidget from "@/components/ChatWidget";
 import {
+  chat,
   prefeitura,
   servicos,
   type ServicoComIcone,
@@ -44,7 +46,7 @@ function ServiceButton({ service }: { service: ServicoComIcone }) {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 px-4 py-10">
+    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 px-4 pt-10 pb-24">
       <div className="flex w-full max-w-md flex-1 flex-col">
         {/* Cabeçalho */}
         <header className="flex flex-col items-center text-center">
@@ -88,6 +90,15 @@ export default function Home() {
           </p>
         </footer>
       </div>
+
+      {chat.habilitado && (
+        <ChatWidget
+          nomePrefeitura={prefeitura.prefeitura.nome}
+          titulo={chat.titulo}
+          rotuloBotao={chat.rotuloBotao}
+          aviso={chat.aviso}
+        />
+      )}
     </main>
   );
 }

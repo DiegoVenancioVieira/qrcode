@@ -11,6 +11,7 @@
   --color-primaria-300: var(--primaria-300);
   --color-primaria-500: var(--primaria-500);
   --color-primaria-600: var(--primaria-600);
+  --color-primaria-700: var(--primaria-700);
 }
 
 * {

@@ -22,7 +22,8 @@
       "100": "#d1fae5",
       "300": "#6ee7b7",
       "500": "#10b981",
-      "600": "#059669"
+      "600": "#059669",
+      "700": "#047857"
     }
   },
   "textos": {
@@ -101,5 +102,11 @@
       "icone": "Cpu",
       "url": "/painel-pgd-aju.html"
     }
-  ]
+  ],
+  "chat": {
+    "habilitado": true,
+    "titulo": "Assistente virtual",
+    "rotuloBotao": "Tire suas dúvidas",
+    "aviso": "Respostas geradas por IA. Não informe dados pessoais — as perguntas podem ser registradas para melhorar o atendimento."
+  }
 }

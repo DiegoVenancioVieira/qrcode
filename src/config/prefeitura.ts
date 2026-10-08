@@ -12,7 +12,7 @@ import araua from "../../config/prefeituras/araua.json";
  */
 
 /** Tons da cor primária usados na interface (escala Tailwind). */
-export type PaletaPrimaria = Record<"50" | "100" | "300" | "500" | "600", string>;
+export type PaletaPrimaria = Record<"50" | "100" | "300" | "500" | "600" | "700", string>;
 
 /**
  * Estrutura de um link de serviço.
@@ -27,6 +27,21 @@ export type Servico = {
   descricao: string;
   icone: string;
   url: string;
+};
+
+/**
+ * Assistente virtual (chat com o Agente de FAQ Municipal). Opcional: sem esta
+ * seção, ou com `habilitado: false`, o botão do chat não aparece. Mesmo
+ * habilitado, o botão só aparece se o servidor tiver `AGENTE_API_URL`.
+ */
+export type ConfigChat = {
+  habilitado: boolean;
+  /** Título do painel (ex.: "Assistente virtual"). */
+  titulo: string;
+  /** Texto do botão flutuante (ex.: "Tire suas dúvidas"). */
+  rotuloBotao: string;
+  /** Aviso de IA/privacidade exibido abaixo do campo de digitação. */
+  aviso: string;
 };
 
 export type ConfigPrefeitura = {
@@ -60,9 +75,10 @@ export type ConfigPrefeitura = {
     seloSeguranca: string;
   };
   servicos: Servico[];
+  chat?: ConfigChat;
 };
 
-const TONS_PRIMARIA = ["50", "100", "300", "500", "600"] as const;
+const TONS_PRIMARIA = ["50", "100", "300", "500", "600", "700"] as const;
 const COR_HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 function ehIcone(valor: unknown): valor is LucideIcon {
@@ -112,6 +128,20 @@ function validar(slug: string, config: ConfigPrefeitura): ConfigPrefeitura {
     }
   });
 
+  if (config.chat !== undefined) {
+    if (typeof config.chat.habilitado !== "boolean") {
+      erros.push(`"chat.habilitado" deve ser true ou false.`);
+    }
+    if (config.chat.habilitado) {
+      for (const campo of ["titulo", "rotuloBotao", "aviso"] as const) {
+        const valor = config.chat[campo];
+        if (typeof valor !== "string" || valor.trim() === "") {
+          erros.push(`"chat.${campo}" é obrigatório quando o chat está habilitado.`);
+        }
+      }
+    }
+  }
+
   if (erros.length > 0) {
     throw new Error(
       `Configuração inválida em config/prefeituras/${slug}.json:\n- ${erros.join("\n- ")}`,
@@ -151,6 +181,14 @@ export const servicos: ServicoComIcone[] = prefeitura.servicos.map((servico) => 
   ...servico,
   Icone: Lucide[servico.icone as keyof typeof Lucide] as LucideIcon,
 }));
+
+/** Configuração do chat; ausente no JSON equivale a desabilitado. */
+export const chat: ConfigChat = prefeitura.chat ?? {
+  habilitado: false,
+  titulo: "",
+  rotuloBotao: "",
+  aviso: "",
+};
 
 /** Variáveis CSS da cor primária, consumidas pelo tema em `globals.css`. */
 export function variaveisDoTema(): Record<string, string> {

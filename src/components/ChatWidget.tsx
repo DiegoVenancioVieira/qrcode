@@ -51,7 +51,22 @@ function RichText({ text }: { text: string }) {
   );
 }
 
-export default function ChatWidget() {
+type ChatWidgetProps = {
+  /** Nome da prefeitura do deploy (`prefeitura.nome` da config). */
+  nomePrefeitura: string;
+  titulo: string;
+  rotuloBotao: string;
+  aviso: string;
+};
+
+export default function ChatWidget({
+  nomePrefeitura,
+  titulo,
+  rotuloBotao,
+  aviso,
+}: ChatWidgetProps) {
+  // O botão só aparece depois de confirmar que o servidor tem agente configurado.
+  const [disponivel, setDisponivel] = useState(false);
   const [open, setOpen] = useState(false);
   const [secretarias, setSecretarias] = useState<Secretaria[] | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -157,6 +172,19 @@ export default function ChatWidget() {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  useEffect(() => {
+    let ativo = true;
+    fetch("/api/chat/status")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { disponivel?: boolean } | null) => {
+        if (ativo && d?.disponivel === true) setDisponivel(true);
+      })
+      .catch(() => {});
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
   async function ask(raw: string) {
     const question = raw.trim();
     if (busy || !current || question.length < 2) return;
@@ -210,16 +238,16 @@ export default function ChatWidget() {
 
   return (
     <>
-      {!open && (
+      {disponivel && !open && (
         <button
           ref={launcherRef}
           type="button"
           onClick={openChat}
-          className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-emerald-600 py-3 pr-5 pl-4 font-semibold text-white shadow-lg shadow-emerald-900/20 transition-all hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:scale-95"
+          className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-primaria-600 py-3 pr-5 pl-4 font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 active:scale-95"
           aria-haspopup="dialog"
         >
           <MessageCircle className="h-5 w-5" aria-hidden="true" />
-          Tire suas dúvidas
+          {rotuloBotao}
         </button>
       )}
 
@@ -228,25 +256,25 @@ export default function ChatWidget() {
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
-          aria-label="Assistente virtual da Prefeitura"
+          aria-label={`${titulo} — ${nomePrefeitura}`}
           className="fixed inset-0 z-50 flex flex-col bg-slate-50 sm:inset-auto sm:right-4 sm:bottom-4 sm:h-[min(640px,calc(100vh-2rem))] sm:w-[400px] sm:overflow-hidden sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-2xl"
         >
           {/* Cabeçalho */}
-          <header className="flex items-center gap-3 bg-emerald-600 px-4 py-3 text-white">
+          <header className="flex items-center gap-3 bg-primaria-600 px-4 py-3 text-white">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
               <Bot className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold leading-tight">Assistente virtual</p>
-              <p className="truncate text-xs text-emerald-100">
-                {busy ? "digitando…" : current ? current.label : "Prefeitura de Aracaju"}
+              <p className="truncate font-semibold leading-tight">{titulo}</p>
+              <p className="truncate text-xs text-white/80">
+                {busy ? "digitando…" : current ? current.label : nomePrefeitura}
               </p>
             </div>
             <button
               type="button"
               onClick={closeChat}
               className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              aria-label="Fechar assistente"
+              aria-label={`Fechar ${titulo.toLowerCase()}`}
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -267,10 +295,10 @@ export default function ChatWidget() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => !active && selectSecretaria(s)}
-                    className={`shrink-0 rounded-full border px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    className={`shrink-0 rounded-full border px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 ${
                       active
-                        ? "border-emerald-600 bg-emerald-600 text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
+                        ? "border-primaria-600 bg-primaria-600 text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-primaria-300 hover:text-primaria-700"
                     }`}
                   >
                     {s.label}
@@ -298,7 +326,7 @@ export default function ChatWidget() {
                 <button
                   type="button"
                   onClick={loadSecretarias}
-                  className="rounded-full border border-emerald-600 px-4 py-1.5 font-medium text-emerald-700 hover:bg-emerald-50"
+                  className="rounded-full border border-primaria-600 px-4 py-1.5 font-medium text-primaria-700 hover:bg-primaria-50"
                 >
                   Tentar novamente
                 </button>
@@ -310,7 +338,7 @@ export default function ChatWidget() {
                 key={m.id}
                 className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed break-words whitespace-pre-wrap shadow-sm ${
                   m.role === "user"
-                    ? "self-end rounded-br-md bg-emerald-600 text-white"
+                    ? "self-end rounded-br-md bg-primaria-600 text-white"
                     : m.role === "bot"
                       ? "self-start rounded-bl-md border border-slate-200 bg-white text-slate-800"
                       : "self-start rounded-bl-md border border-red-200 bg-red-50 text-red-700"
@@ -340,7 +368,7 @@ export default function ChatWidget() {
                     key={q}
                     type="button"
                     onClick={() => ask(q)}
-                    className="rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-left text-sm text-emerald-700 hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    className="rounded-full border border-primaria-100 bg-white px-3 py-1.5 text-left text-sm text-primaria-700 hover:bg-primaria-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
                   >
                     {q}
                   </button>
@@ -380,20 +408,19 @@ export default function ChatWidget() {
                   }
                 }}
                 placeholder="Digite sua pergunta…"
-                className="max-h-[110px] flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-base text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:outline-none disabled:opacity-60"
+                className="max-h-[110px] flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-base text-slate-800 placeholder:text-slate-400 focus:border-primaria-500 focus:bg-white focus:outline-none disabled:opacity-60"
               />
               <button
                 type="submit"
                 disabled={busy || !current || input.trim().length < 2}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white transition-colors hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:bg-slate-300"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primaria-600 text-white transition-colors hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 disabled:bg-slate-300"
                 aria-label="Enviar pergunta"
               >
                 <SendHorizontal className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
             <p className="mt-1.5 text-center text-[11px] leading-snug text-slate-400">
-              Respostas geradas por IA. Não informe dados pessoais — as perguntas
-              podem ser registradas para melhorar o atendimento.
+              {aviso}
             </p>
           </form>
         </div>

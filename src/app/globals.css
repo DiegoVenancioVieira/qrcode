@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/*
+ * Cor primária da prefeitura. Os valores vêm de `config/prefeituras/<slug>.json`
+ * (tema.primaria) e são injetados como variáveis CSS no <html> pelo layout.
+ * Use nas classes como `bg-primaria-50`, `text-primaria-600` etc.
+ */
+@theme inline {
+  --color-primaria-50: var(--primaria-50);
+  --color-primaria-100: var(--primaria-100);
+  --color-primaria-300: var(--primaria-300);
+  --color-primaria-500: var(--primaria-500);
+  --color-primaria-600: var(--primaria-600);
+  --color-primaria-700: var(--primaria-700);
+}
+
 * {
   box-sizing: border-box;
 }

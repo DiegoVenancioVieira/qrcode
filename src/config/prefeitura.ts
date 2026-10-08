@@ -54,8 +54,11 @@ export type ConfigPrefeitura = {
     uf: string;
   };
   site: {
-    /** URL pública do hub (usada em metadados/Open Graph). */
-    url: string;
+    /**
+     * URL pública do hub (metadados/Open Graph). Opcional: no deploy vale o
+     * domínio do Coolify (`SITE_URL` ou `COOLIFY_URL`), ver `urlDoSite()`.
+     */
+    url?: string;
     titulo: string;
     descricao: string;
     idioma: string;
@@ -95,7 +98,6 @@ function validar(slug: string, config: ConfigPrefeitura): ConfigPrefeitura {
   const obrigatorios: [string, unknown][] = [
     ["prefeitura.nome", config.prefeitura?.nome],
     ["prefeitura.nomeOficial", config.prefeitura?.nomeOficial],
-    ["site.url", config.site?.url],
     ["site.titulo", config.site?.titulo],
     ["site.descricao", config.site?.descricao],
     ["site.idioma", config.site?.idioma],
@@ -181,6 +183,30 @@ export const servicos: ServicoComIcone[] = prefeitura.servicos.map((servico) => 
   ...servico,
   Icone: Lucide[servico.icone as keyof typeof Lucide] as LucideIcon,
 }));
+
+/**
+ * URL pública do hub, na ordem: `SITE_URL` (definida à mão), `COOLIFY_URL`
+ * (injetada pelo Coolify com o domínio configurado na aplicação; se houver
+ * vários, vale o primeiro) e por fim `site.url` do JSON. Sem nenhuma, os
+ * metadados saem com caminhos relativos.
+ */
+export function urlDoSite(): URL | undefined {
+  const candidatos = [
+    process.env.SITE_URL,
+    process.env.COOLIFY_URL?.split(",")[0],
+    prefeitura.site.url,
+  ];
+  for (const valor of candidatos) {
+    const url = valor?.trim();
+    if (!url) continue;
+    try {
+      return new URL(url);
+    } catch {
+      throw new Error(`URL do site inválida: "${url}".`);
+    }
+  }
+  return undefined;
+}
 
 /** Configuração do chat; ausente no JSON equivale a desabilitado. */
 export const chat: ConfigChat = prefeitura.chat ?? {

@@ -43,6 +43,12 @@ No PowerShell: `$env:PREFEITURA="araua"; npm run dev`.
 No Coolify: cadastre `PREFEITURA` nas variáveis de ambiente da aplicação
 marcando **Build Variable**.
 
+O domínio do hub é o que estiver configurado na aplicação do Coolify (o
+domínio coringa permite qualquer subdomínio, ex.: `araua.<dominio-coringa>`).
+O Coolify repassa esse endereço em `COOLIFY_URL`, usado nos metadados de
+compartilhamento. Para forçar outro endereço, defina `SITE_URL` (também como
+**Build Variable**).
+
 | Prefeitura | `PREFEITURA` | Arquivo |
 | --- | --- | --- |
 | Aracaju | `aracaju` | [`config/prefeituras/aracaju.json`](config/prefeituras/aracaju.json) |
@@ -55,7 +61,7 @@ marcando **Build Variable**.
 | `prefeitura.nome` | Nome exibido no cabeçalho (ex.: "Prefeitura de Aracaju") |
 | `prefeitura.nomeOficial` | Nome no rodapé/copyright (ex.: "Prefeitura Municipal de Aracaju") |
 | `prefeitura.municipio` / `prefeitura.uf` | Município e estado (informativo) |
-| `site.url` | URL pública do hub (base dos metadados Open Graph) |
+| `site.url` | Opcional. URL pública do hub, base dos metadados Open Graph. No deploy vale o domínio configurado no Coolify (`COOLIFY_URL`) ou a variável `SITE_URL`, que têm prioridade sobre este campo |
 | `site.titulo` / `site.descricao` | `<title>`, meta description e prévia ao compartilhar o link |
 | `site.idioma` | Atributo `lang` do HTML e locale do Open Graph |
 | `marca.logo` / `marca.logoAlt` | Brasão/logo do cabeçalho (caminho em `public/` ou URL) e texto alternativo |

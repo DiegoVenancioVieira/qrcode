@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Cor primária da prefeitura. Os valores vêm de `config/prefeitura.json`
+ * Cor primária da prefeitura. Os valores vêm de `config/prefeituras/<slug>.json`
  * (tema.primaria) e são injetados como variáveis CSS no <html> pelo layout.
  * Use nas classes como `bg-primaria-50`, `text-primaria-600` etc.
  */

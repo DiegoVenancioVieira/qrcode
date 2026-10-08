@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { prefeitura, variaveisDoTema } from "@/config/prefeitura";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -8,13 +9,23 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Prefeitura de Aracaju | Serviços Digitais",
-  description:
-    "Hub de acesso rápido aos serviços digitais da Prefeitura Municipal de Aracaju.",
+  metadataBase: new URL(prefeitura.site.url),
+  title: prefeitura.site.titulo,
+  description: prefeitura.site.descricao,
+  icons: { icon: prefeitura.marca.favicon },
+  openGraph: {
+    type: "website",
+    url: "/",
+    title: prefeitura.site.titulo,
+    description: prefeitura.site.descricao,
+    siteName: prefeitura.prefeitura.nome,
+    locale: prefeitura.site.idioma.replace("-", "_"),
+    images: [{ url: prefeitura.marca.logo, alt: prefeitura.marca.logoAlt }],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#059669",
+  themeColor: prefeitura.tema.primaria["600"],
   width: "device-width",
   initialScale: 1,
 };
@@ -25,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang={prefeitura.site.idioma} style={variaveisDoTema()}>
       <body className={`${geistSans.variable} antialiased`}>{children}</body>
     </html>
   );

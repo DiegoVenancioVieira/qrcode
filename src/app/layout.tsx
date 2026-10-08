@@ -8,8 +8,8 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-// Sem domínio conhecido no build, a imagem de prévia ficaria apontando para
-// localhost; nesse caso ela é omitida.
+// Sem domínio conhecido no build, a URL e a imagem de prévia ficariam
+// relativas ou apontando para localhost; nesse caso elas são omitidas.
 const urlSite = urlDoSite();
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   icons: { icon: prefeitura.marca.favicon },
   openGraph: {
     type: "website",
-    url: "/",
+    url: urlSite ? "/" : undefined,
     title: prefeitura.site.titulo,
     description: prefeitura.site.descricao,
     siteName: prefeitura.prefeitura.nome,

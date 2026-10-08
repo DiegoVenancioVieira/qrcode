@@ -33,59 +33,94 @@
   "servicos": [
     {
       "id": 1,
-      "titulo": "Portal da Prefeitura",
-      "descricao": "Notícias e serviços do município",
-      "icone": "Landmark",
-      "url": "https://araua.se.gov.br"
+      "titulo": "Portal do Contribuinte",
+      "descricao": "Serviços tributários online",
+      "icone": "Receipt",
+      "url": "https://araua.se.gov.br/portal-do-contribuinte"
     },
     {
       "id": 2,
-      "titulo": "Portal da Transparência",
-      "descricao": "Receitas, despesas e contratos",
-      "icone": "Eye",
-      "url": "https://araua.se.gov.br"
+      "titulo": "Ouvidoria",
+      "descricao": "Registre elogios, sugestões e denúncias",
+      "icone": "MessageSquareText",
+      "url": "https://araua.se.gov.br/ouvidoria"
     },
     {
       "id": 3,
-      "titulo": "Ouvidoria",
-      "descricao": "Registre elogios, dúvidas e denúncias",
-      "icone": "Phone",
-      "url": "https://araua.se.gov.br"
-    },
-    {
-      "id": 4,
       "titulo": "e-SIC",
       "descricao": "Solicite informações públicas",
       "icone": "FileSearch",
-      "url": "https://araua.se.gov.br"
+      "url": "https://araua.se.gov.br/e-sic"
+    },
+    {
+      "id": 4,
+      "titulo": "Portal da Transparência",
+      "descricao": "Receitas, despesas, contratos e mais",
+      "icone": "Eye",
+      "url": "https://araua.se.gov.br/transparencia"
     },
     {
       "id": 5,
       "titulo": "Diário Oficial",
       "descricao": "Publicações oficiais do município",
       "icone": "Newspaper",
-      "url": "https://araua.se.gov.br"
+      "url": "https://publicacoesmunicipais.com.br/eatos/araua"
     },
     {
       "id": 6,
       "titulo": "Licitações",
       "descricao": "Editais e processos de compras",
       "icone": "Gavel",
-      "url": "https://araua.se.gov.br"
+      "url": "https://araua.se.gov.br/licitacoes"
     },
     {
       "id": 7,
-      "titulo": "Tributos e IPTU",
-      "descricao": "Emita guias e certidões",
-      "icone": "Receipt",
-      "url": "https://araua.se.gov.br"
+      "titulo": "Concursos",
+      "descricao": "Editais e resultados de seleções",
+      "icone": "Award",
+      "url": "https://araua.se.gov.br/concursos/"
     },
     {
       "id": 8,
-      "titulo": "Contracheque",
-      "descricao": "Acesso para servidores municipais",
-      "icone": "Wallet",
-      "url": "https://araua.se.gov.br"
+      "titulo": "Obras Públicas",
+      "descricao": "Acompanhe as obras do município",
+      "icone": "HardHat",
+      "url": "https://araua.se.gov.br/obras"
+    },
+    {
+      "id": 9,
+      "titulo": "Notícias",
+      "descricao": "Ações e comunicados da Prefeitura",
+      "icone": "Megaphone",
+      "url": "https://araua.se.gov.br/noticias"
+    },
+    {
+      "id": 10,
+      "titulo": "Perguntas Frequentes",
+      "descricao": "Tire suas dúvidas sobre os serviços",
+      "icone": "CircleHelp",
+      "url": "https://araua.se.gov.br/f-a-q/"
+    },
+    {
+      "id": 11,
+      "titulo": "Conheça Arauá",
+      "descricao": "História da cidade",
+      "icone": "MapPinned",
+      "url": "https://araua.se.gov.br/historia-da-cidade"
+    },
+    {
+      "id": 12,
+      "titulo": "Portal da Prefeitura",
+      "descricao": "Site oficial da Prefeitura de Arauá",
+      "icone": "Landmark",
+      "url": "https://araua.se.gov.br/"
+    },
+    {
+      "id": 13,
+      "titulo": "Instagram",
+      "descricao": "@prefeituraaraua",
+      "icone": "Instagram",
+      "url": "https://www.instagram.com/prefeituraaraua/"
     }
   ]
 }

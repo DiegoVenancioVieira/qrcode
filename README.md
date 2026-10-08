@@ -29,6 +29,30 @@ Os serviços são definidos no array `serviceLinks` em
 substituído futuramente por uma coleção do **Directus** (CMS Headless),
 bastando trocar o mock por uma chamada `fetch` à API.
 
+## Assistente virtual (chat)
+
+O botão **"Tire suas dúvidas"** abre um chat com o Agente de FAQ Municipal
+(repo `agente_inteligente`), com seletor de secretaria (SEMDE, PROCON,
+SERMULHER, IntegrAju — a lista vem do próprio agente).
+
+- `src/components/ChatWidget.tsx` — widget (client component). A conversa fica
+  só em memória, sem `localStorage`.
+- `src/app/api/chat/route.ts` — repassa `POST /api/chat` para `POST {agente}/ask`.
+- `src/app/api/chat/secretarias/route.ts` — repassa para `GET {agente}/secretarias`.
+
+O navegador nunca fala direto com o agente: o endereço dele fica oculto e não há
+bloqueio de conteúdo misto (hub em HTTPS, agente em HTTP).
+
+Configure a variável de ambiente (veja `.env.example`):
+
+```bash
+AGENTE_API_URL=http://faq-cache:8000   # endereço interno do agente
+```
+
+Sem ela, o widget mostra "assistente indisponível". O IP do cidadão é repassado
+no `X-Forwarded-For` para o rate-limit do agente valer por pessoa; no agente,
+use `TRUSTED_PROXY_HOPS=1`.
+
 ## Assets
 
 - `public/logo.png` — brasão/logo da Prefeitura (avatar do cabeçalho)

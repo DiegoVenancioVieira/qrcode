@@ -14,6 +14,7 @@ import {
   Siren,
   type LucideIcon,
 } from "lucide-react";
+import ChatWidget from "@/components/ChatWidget";
 
 /**
  * Estrutura de um link de serviço.
@@ -145,7 +146,7 @@ function ServiceButton({ service }: { service: ServiceLink }) {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 px-4 py-10">
+    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 px-4 pt-10 pb-24">
       <div className="flex w-full max-w-md flex-1 flex-col">
         {/* Cabeçalho */}
         <header className="flex flex-col items-center text-center">
@@ -189,6 +190,8 @@ export default function Home() {
           </p>
         </footer>
       </div>
+
+      <ChatWidget />
     </main>
   );
 }

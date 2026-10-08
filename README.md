@@ -51,7 +51,8 @@ AGENTE_API_URL=http://faq-cache:8000   # endereço interno do agente
 
 Sem ela, o widget mostra "assistente indisponível". O IP do cidadão é repassado
 no `X-Forwarded-For` para o rate-limit do agente valer por pessoa; no agente,
-use `TRUSTED_PROXY_HOPS=1`.
+defina `TRUSTED_PROXIES` com as redes Docker do Traefik e do hub
+(ex.: `172.16.0.0/12,10.0.0.0/8`).
 
 ## Assets
 

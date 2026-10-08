@@ -15,6 +15,9 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ detail: "JSON inválido" }, { status: 400 });
   }
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return Response.json({ detail: "JSON inválido" }, { status: 400 });
+  }
 
   const question = typeof body.question === "string" ? body.question.trim() : "";
   const secretaria = typeof body.secretaria === "string" ? body.secretaria : "";
@@ -38,7 +41,8 @@ export async function POST(request: Request) {
       method: "POST",
       headers,
       body: JSON.stringify({ question, secretaria: secretaria || null }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      // Se o cidadão fechar o chat ou trocar de secretaria, cancela também no agente.
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(TIMEOUT_MS)]),
       cache: "no-store",
     });
   } catch {
@@ -52,6 +56,12 @@ export async function POST(request: Request) {
   }
   if (!r.ok) return agenteIndisponivel(502);
 
-  const data = await r.json();
+  let data: { answer?: unknown; cached?: unknown };
+  try {
+    data = await r.json();
+  } catch {
+    return agenteIndisponivel(502);
+  }
+  if (typeof data !== "object" || data === null) return agenteIndisponivel(502);
   return Response.json({ answer: String(data.answer ?? ""), cached: Boolean(data.cached) });
 }

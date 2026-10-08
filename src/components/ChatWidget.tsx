@@ -64,6 +64,9 @@ export default function ChatWidget() {
   const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const restoreFocusRef = useRef(false);
 
   const selectSecretaria = useCallback((s: Secretaria) => {
     abortRef.current?.abort();
@@ -93,18 +96,54 @@ export default function ChatWidget() {
     if (!secretarias) loadSecretarias();
   }
 
+  // Fechar cancela a pergunta em andamento: não faz sentido o agente (em CPU)
+  // continuar processando uma resposta que ninguém vai ler.
+  const closeChat = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      setMessages((m) => [...m, msg("error", "Pergunta cancelada ao fechar o assistente.")]);
+    }
+    restoreFocusRef.current = true;
+    setOpen(false);
+  }, []);
+
   useEffect(() => {
     if (open) inputRef.current?.focus();
+    else if (restoreFocusRef.current) {
+      restoreFocusRef.current = false;
+      launcherRef.current?.focus();
+    }
   }, [open, current]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy, slow]);
 
-  // Esc fecha o painel; trava a rolagem da página por baixo no celular.
+  // Esc fecha o painel; Tab fica preso dentro dele (aria-modal); trava a rolagem
+  // da página por baixo no celular.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return closeChat();
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusables = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          "button:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex='-1'])",
+        ),
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      const inside = dialogRef.current.contains(active);
+      if (e.shiftKey && (active === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     const overflow = document.body.style.overflow;
     if (window.matchMedia("(max-width: 639px)").matches) {
@@ -114,7 +153,7 @@ export default function ChatWidget() {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = overflow;
     };
-  }, [open]);
+  }, [open, closeChat]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -125,6 +164,7 @@ export default function ChatWidget() {
     const controller = new AbortController();
     abortRef.current = controller;
     setInput("");
+    if (inputRef.current) inputRef.current.style.height = "auto";
     setBusy(true);
     setSlow(false);
     setMessages((m) => [...m, msg("user", question)]);
@@ -172,6 +212,7 @@ export default function ChatWidget() {
     <>
       {!open && (
         <button
+          ref={launcherRef}
           type="button"
           onClick={openChat}
           className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-emerald-600 py-3 pr-5 pl-4 font-semibold text-white shadow-lg shadow-emerald-900/20 transition-all hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:scale-95"
@@ -184,6 +225,7 @@ export default function ChatWidget() {
 
       {open && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label="Assistente virtual da Prefeitura"
@@ -202,7 +244,7 @@ export default function ChatWidget() {
             </div>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeChat}
               className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Fechar assistente"
             >
@@ -213,7 +255,7 @@ export default function ChatWidget() {
           {/* Seletor de secretaria */}
           {secretarias && secretarias.length > 1 && (
             <div
-              role="tablist"
+              role="group"
               aria-label="Escolha a secretaria"
               className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-3 py-2 [scrollbar-width:none]"
             >
@@ -223,8 +265,7 @@ export default function ChatWidget() {
                   <button
                     key={s.slug}
                     type="button"
-                    role="tab"
-                    aria-selected={active}
+                    aria-pressed={active}
                     onClick={() => !active && selectSecretaria(s)}
                     className={`shrink-0 rounded-full border px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                       active
@@ -287,7 +328,7 @@ export default function ChatWidget() {
                   <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
                 </span>
                 {slow && (
-                  <p className="mt-1.5">Buscando a resposta… pode levar até 20 segundos.</p>
+                  <p className="mt-1.5">Buscando a resposta… em horários de movimento pode demorar um pouco mais.</p>
                 )}
               </div>
             )}

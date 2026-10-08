@@ -20,6 +20,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Prefeitura deste deploy (config/prefeituras/<slug>.json). Lida no build,
+# pois a página é gerada estaticamente. No Coolify, cadastre PREFEITURA como
+# variável de ambiente marcada como "Build Variable".
+ARG PREFEITURA=aracaju
+ENV PREFEITURA=$PREFEITURA
+
 # Next.js collects completely anonymous telemetry data about general usage.
 # https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -36,6 +42,8 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ARG PREFEITURA=aracaju
+ENV PREFEITURA=$PREFEITURA
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs

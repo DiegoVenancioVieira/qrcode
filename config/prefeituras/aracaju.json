@@ -1,0 +1,112 @@
+{
+  "prefeitura": {
+    "nome": "Prefeitura de Aracaju",
+    "nomeOficial": "Prefeitura Municipal de Aracaju",
+    "municipio": "Aracaju",
+    "uf": "SE"
+  },
+  "site": {
+    "url": "https://qrcode.aracaju.se.gov.br",
+    "titulo": "Prefeitura de Aracaju | Serviços Digitais",
+    "descricao": "Hub de acesso rápido aos serviços digitais da Prefeitura Municipal de Aracaju.",
+    "idioma": "pt-BR"
+  },
+  "marca": {
+    "logo": "/logo.png",
+    "logoAlt": "Brasão da Prefeitura de Aracaju",
+    "favicon": "/favicon.ico"
+  },
+  "tema": {
+    "primaria": {
+      "50": "#ecfdf5",
+      "100": "#d1fae5",
+      "300": "#6ee7b7",
+      "500": "#10b981",
+      "600": "#059669",
+      "700": "#047857"
+    }
+  },
+  "textos": {
+    "subtitulo": "Toque em um serviço abaixo para acessar rapidamente.",
+    "rotuloListaServicos": "Serviços digitais da Prefeitura",
+    "seloSeguranca": "Ambiente oficial e seguro"
+  },
+  "servicos": [
+    {
+      "id": 1,
+      "titulo": "Portal do Cidadão",
+      "descricao": "Acesse todos os serviços online",
+      "icone": "Landmark",
+      "url": "https://www.aracaju.se.gov.br"
+    },
+    {
+      "id": 2,
+      "titulo": "2ª Via de IPTU",
+      "descricao": "Emita e pague seu carnê",
+      "icone": "Receipt",
+      "url": "https://www.aracaju.se.gov.br"
+    },
+    {
+      "id": 3,
+      "titulo": "Agendamento de Saúde",
+      "descricao": "Marque consultas e exames",
+      "icone": "HeartPulse",
+      "url": "https://www.aracaju.se.gov.br"
+    },
+    {
+      "id": 4,
+      "titulo": "Protocolo Digital",
+      "descricao": "Abra e acompanhe solicitações",
+      "icone": "FileText",
+      "url": "https://www.aracaju.se.gov.br"
+    },
+    {
+      "id": 5,
+      "titulo": "Ouvidoria",
+      "descricao": "Registre elogios, dúvidas e denúncias",
+      "icone": "Phone",
+      "url": "https://www.aracaju.se.gov.br"
+    },
+    {
+      "id": 6,
+      "titulo": "Mapa de Serviços",
+      "descricao": "Encontre unidades próximas de você",
+      "icone": "MapPin",
+      "url": "https://www.aracaju.se.gov.br"
+    },
+    {
+      "id": 7,
+      "titulo": "SIGMA · SerMulher",
+      "descricao": "Gestão do atendimento à mulher",
+      "icone": "HeartHandshake",
+      "url": "https://sigma-sermulher.aracaju.se.gov.br"
+    },
+    {
+      "id": 8,
+      "titulo": "Patrulha Maria da Penha",
+      "descricao": "Central de proteção à mulher",
+      "icone": "Siren",
+      "url": "https://sosmulher-sermulher.aracaju.se.gov.br"
+    },
+    {
+      "id": 9,
+      "titulo": "Observatório SerMulher",
+      "descricao": "Transparência da rede de proteção",
+      "icone": "BarChart3",
+      "url": "/observatorio.html"
+    },
+    {
+      "id": 10,
+      "titulo": "Governo Digital · PGD-AJU",
+      "descricao": "Programa de Governo Digital de Aracaju",
+      "icone": "Cpu",
+      "url": "/painel-pgd-aju.html"
+    }
+  ],
+  "chat": {
+    "habilitado": true,
+    "titulo": "Assistente virtual",
+    "rotuloBotao": "Tire suas dúvidas",
+    "aviso": "Respostas geradas por IA. Não informe dados pessoais — as perguntas podem ser registradas para melhorar o atendimento."
+  }
+}

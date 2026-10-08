@@ -27,3 +27,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# credenciais locais (tokens de API do Coolify etc.) — nunca versionar
+api_coolify_*

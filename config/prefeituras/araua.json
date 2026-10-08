@@ -1,0 +1,91 @@
+{
+  "prefeitura": {
+    "nome": "Prefeitura de Arauá",
+    "nomeOficial": "Prefeitura Municipal de Arauá",
+    "municipio": "Arauá",
+    "uf": "SE"
+  },
+  "site": {
+    "url": "https://qrcode.araua.se.gov.br",
+    "titulo": "Prefeitura de Arauá | Serviços Digitais",
+    "descricao": "Hub de acesso rápido aos serviços digitais da Prefeitura Municipal de Arauá.",
+    "idioma": "pt-BR"
+  },
+  "marca": {
+    "logo": "/prefeituras/araua/logo.svg",
+    "logoAlt": "Brasão da Prefeitura de Arauá",
+    "favicon": "/prefeituras/araua/logo.svg"
+  },
+  "tema": {
+    "primaria": {
+      "50": "#eff6ff",
+      "100": "#dbeafe",
+      "300": "#93c5fd",
+      "500": "#3b82f6",
+      "600": "#2563eb"
+    }
+  },
+  "textos": {
+    "subtitulo": "Toque em um serviço abaixo para acessar rapidamente.",
+    "rotuloListaServicos": "Serviços digitais da Prefeitura",
+    "seloSeguranca": "Ambiente oficial e seguro"
+  },
+  "servicos": [
+    {
+      "id": 1,
+      "titulo": "Portal da Prefeitura",
+      "descricao": "Notícias e serviços do município",
+      "icone": "Landmark",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 2,
+      "titulo": "Portal da Transparência",
+      "descricao": "Receitas, despesas e contratos",
+      "icone": "Eye",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 3,
+      "titulo": "Ouvidoria",
+      "descricao": "Registre elogios, dúvidas e denúncias",
+      "icone": "Phone",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 4,
+      "titulo": "e-SIC",
+      "descricao": "Solicite informações públicas",
+      "icone": "FileSearch",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 5,
+      "titulo": "Diário Oficial",
+      "descricao": "Publicações oficiais do município",
+      "icone": "Newspaper",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 6,
+      "titulo": "Licitações",
+      "descricao": "Editais e processos de compras",
+      "icone": "Gavel",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 7,
+      "titulo": "Tributos e IPTU",
+      "descricao": "Emita guias e certidões",
+      "icone": "Receipt",
+      "url": "https://araua.se.gov.br"
+    },
+    {
+      "id": 8,
+      "titulo": "Contracheque",
+      "descricao": "Acesso para servidores municipais",
+      "icone": "Wallet",
+      "url": "https://araua.se.gov.br"
+    }
+  ]
+}

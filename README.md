@@ -23,10 +23,32 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ## Configuração por prefeitura
 
-Este projeto é a base para replicar o hub em outras prefeituras. **Tudo o que
-muda de um município para outro fica em um único arquivo:
-[`config/prefeitura.json`](config/prefeitura.json).** O código em `src/` não
-contém nenhuma informação específica de Aracaju.
+Um único código atende várias prefeituras — **um deploy por prefeitura**. Tudo
+o que muda de um município para outro fica em
+`config/prefeituras/<slug>.json`, com os assets (logo, favicon) em
+`public/prefeituras/<slug>/`. O código em `src/` não contém dados de nenhum
+município.
+
+A prefeitura do deploy é escolhida pela variável de ambiente **`PREFEITURA`**
+(padrão: `aracaju`). Como a página é gerada no build, a variável precisa
+existir **no build**:
+
+```bash
+PREFEITURA=araua npm run dev      # desenvolvimento
+PREFEITURA=araua npm run build    # produção
+docker build --build-arg PREFEITURA=araua -t qrcode-araua .
+```
+
+No PowerShell: `$env:PREFEITURA="araua"; npm run dev`.
+No Coolify: cadastre `PREFEITURA` nas variáveis de ambiente da aplicação
+marcando **Build Variable**.
+
+| Prefeitura | `PREFEITURA` | Arquivo |
+| --- | --- | --- |
+| Aracaju | `aracaju` | [`config/prefeituras/aracaju.json`](config/prefeituras/aracaju.json) |
+| Arauá | `araua` | [`config/prefeituras/araua.json`](config/prefeituras/araua.json) |
+
+### Campos
 
 | Campo | O que controla |
 | --- | --- |
@@ -48,19 +70,24 @@ O campo `icone` aceita o nome de qualquer ícone do
 ferramenta como [uicolors.app](https://uicolors.app) ajuda.
 
 A configuração é validada durante o build: campos obrigatórios vazios, cores
-inválidas, ícones inexistentes ou `id`s duplicados interrompem o `npm run build`
-com uma mensagem indicando o campo com problema.
+inválidas, ícones inexistentes, `id`s duplicados ou um `PREFEITURA`
+desconhecido interrompem o `npm run build` com uma mensagem indicando o
+problema.
 
-### Como replicar para outra prefeitura
+### Como adicionar uma nova prefeitura
 
-1. Edite `config/prefeitura.json` com os dados do novo município.
-2. Substitua `public/logo.png` e `public/favicon.ico` (ou aponte `marca.logo` /
-   `marca.favicon` para os novos arquivos).
-3. Remova de `public/` as apresentações exclusivas de Aracaju que não se
-   aplicam (`observatorio`, `painel-pgd-aju`, `patrulha-maria-da-penha`,
-   `busaju`, `mia`, `qrcode-hub` — `.html`/`.pdf` — além de `aju.png` e
-   `comite.png`) e os serviços que apontam para elas.
-4. Rode `npm run build` para validar e gere a imagem Docker normalmente.
+1. Copie `config/prefeituras/araua.json` para `config/prefeituras/<slug>.json`
+   e preencha os dados do município.
+2. Coloque o brasão/favicon em `public/prefeituras/<slug>/` e aponte
+   `marca.logo` / `marca.favicon` para eles.
+3. Registre o JSON no mapa `PREFEITURAS` em
+   [`src/config/prefeitura.ts`](src/config/prefeitura.ts).
+4. Rode `PREFEITURA=<slug> npm run build` para validar e crie no Coolify uma
+   aplicação com `PREFEITURA=<slug>`.
+
+As apresentações em `public/*.html|pdf` (Observatório, PGD-AJU, Patrulha
+Maria da Penha, BusAju, MIA, hub) são conteúdo de Aracaju e só são
+referenciadas pela configuração de Aracaju.
 
 ## Estrutura de dados
 
@@ -72,5 +99,5 @@ leitura do JSON por uma chamada `fetch` à API mantendo o mesmo formato.
 
 ## Assets
 
-- `public/logo.png` — brasão/logo da Prefeitura (avatar do cabeçalho)
-- `public/favicon.ico` — favicon
+- `public/logo.png`, `public/favicon.ico` — brasão e favicon de Aracaju
+- `public/prefeituras/<slug>/` — assets das demais prefeituras

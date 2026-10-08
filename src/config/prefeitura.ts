@@ -1,13 +1,14 @@
 import * as Lucide from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import dados from "../../config/prefeitura.json";
+import aracaju from "../../config/prefeituras/aracaju.json";
+import araua from "../../config/prefeituras/araua.json";
 
 /**
  * Configuração de uma prefeitura (tenant).
  *
- * Tudo o que muda de uma prefeitura para outra fica em
- * `config/prefeitura.json`. Para replicar o hub em outro município, basta
- * editar esse arquivo e trocar os assets em `public/` (logo, favicon etc.).
+ * Cada prefeitura tem um arquivo em `config/prefeituras/<slug>.json` e seus
+ * assets em `public/prefeituras/<slug>/`. A prefeitura do deploy é escolhida
+ * pela variável de ambiente `PREFEITURA` (padrão: "aracaju"), lida no build.
  */
 
 /** Tons da cor primária usados na interface (escala Tailwind). */
@@ -72,7 +73,7 @@ function ehIcone(valor: unknown): valor is LucideIcon {
  * Valida a configuração no build/inicialização, para que erros de digitação
  * no JSON apareçam com uma mensagem clara em vez de uma página quebrada.
  */
-function validar(config: ConfigPrefeitura): ConfigPrefeitura {
+function validar(slug: string, config: ConfigPrefeitura): ConfigPrefeitura {
   const erros: string[] = [];
 
   const obrigatorios: [string, unknown][] = [
@@ -113,13 +114,35 @@ function validar(config: ConfigPrefeitura): ConfigPrefeitura {
 
   if (erros.length > 0) {
     throw new Error(
-      `Configuração inválida em config/prefeitura.json:\n- ${erros.join("\n- ")}`,
+      `Configuração inválida em config/prefeituras/${slug}.json:\n- ${erros.join("\n- ")}`,
     );
   }
   return config;
 }
 
-export const prefeitura = validar(dados as ConfigPrefeitura);
+/**
+ * Prefeituras disponíveis. Para adicionar uma nova, crie o JSON em
+ * `config/prefeituras/` e registre-o aqui.
+ */
+const PREFEITURAS: Record<string, ConfigPrefeitura> = {
+  aracaju,
+  araua,
+};
+
+const PREFEITURA_PADRAO = "aracaju";
+
+function carregar(): ConfigPrefeitura {
+  const slug = process.env.PREFEITURA?.trim().toLowerCase() || PREFEITURA_PADRAO;
+  const config = PREFEITURAS[slug];
+  if (!config) {
+    throw new Error(
+      `PREFEITURA="${slug}" não encontrada. Opções: ${Object.keys(PREFEITURAS).join(", ")}.`,
+    );
+  }
+  return validar(slug, config);
+}
+
+export const prefeitura = carregar();
 
 export type ServicoComIcone = Servico & { Icone: LucideIcon };
 

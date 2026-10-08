@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Arauá">
+  <!-- Logo provisório: substituir pelo brasão oficial da Prefeitura de Arauá -->
+  <rect width="96" height="96" fill="#ffffff"/>
+  <path d="M48 14 74 24v22c0 17-11 29-26 36-15-7-26-19-26-36V24z" fill="#2563eb"/>
+  <text x="48" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff">ARAUÁ</text>
+</svg>

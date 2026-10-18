@@ -56,12 +56,17 @@ export async function POST(request: Request) {
   }
   if (!r.ok) return agenteIndisponivel(502);
 
-  let data: { answer?: unknown; cached?: unknown };
+  let data: { answer?: unknown; cached?: unknown; respondida?: unknown };
   try {
     data = await r.json();
   } catch {
     return agenteIndisponivel(502);
   }
   if (typeof data !== "object" || data === null) return agenteIndisponivel(502);
-  return Response.json({ answer: String(data.answer ?? ""), cached: Boolean(data.cached) });
+  return Response.json({
+    answer: String(data.answer ?? ""),
+    cached: Boolean(data.cached),
+    // Agentes antigos não mandam o campo: trata como respondida.
+    respondida: data.respondida !== false,
+  });
 }

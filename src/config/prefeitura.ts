@@ -42,6 +42,18 @@ export type ConfigChat = {
   rotuloBotao: string;
   /** Aviso de IA/privacidade exibido abaixo do campo de digitação. */
   aviso: string;
+  /**
+   * Atendimento humano (Chatwoot). Opcional: quando o assistente não encontra a
+   * resposta, oferece "Falar com atendente", que abre a caixa da secretaria.
+   */
+  atendimento?: ConfigAtendimento;
+};
+
+export type ConfigAtendimento = {
+  /** Endereço do Chatwoot (ex.: "https://atendimento.exemplo.gov.br"). */
+  url: string;
+  /** Slug da secretaria no agente → website token da caixa "Website" no Chatwoot. */
+  caixas: Record<string, string>;
 };
 
 export type ConfigPrefeitura = {
@@ -139,6 +151,21 @@ function validar(slug: string, config: ConfigPrefeitura): ConfigPrefeitura {
         const valor = config.chat[campo];
         if (typeof valor !== "string" || valor.trim() === "") {
           erros.push(`"chat.${campo}" é obrigatório quando o chat está habilitado.`);
+        }
+      }
+    }
+    const at = config.chat.atendimento;
+    if (at !== undefined) {
+      if (typeof at.url !== "string" || !/^https:\/\/[^\s/]+/.test(at.url)) {
+        erros.push(`"chat.atendimento.url" deve ser um endereço https.`);
+      }
+      if (typeof at.caixas !== "object" || at.caixas === null || Array.isArray(at.caixas)) {
+        erros.push(`"chat.atendimento.caixas" deve ser um objeto {secretaria: websiteToken}.`);
+      } else {
+        for (const [slug, token] of Object.entries(at.caixas)) {
+          if (typeof token !== "string" || !/^[A-Za-z0-9]{8,64}$/.test(token)) {
+            erros.push(`"chat.atendimento.caixas.${slug}" deve ser o website token da caixa.`);
+          }
         }
       }
     }

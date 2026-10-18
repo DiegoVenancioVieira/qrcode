@@ -97,6 +97,7 @@ export default function Home() {
           titulo={chat.titulo}
           rotuloBotao={chat.rotuloBotao}
           aviso={chat.aviso}
+          atendimento={chat.atendimento}
         />
       )}
     </main>

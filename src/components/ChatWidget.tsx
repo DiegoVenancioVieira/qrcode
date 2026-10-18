@@ -1,7 +1,8 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { Bot, Loader2, MessageCircle, SendHorizontal, X } from "lucide-react";
+import { Bot, Headset, Loader2, MessageCircle, RotateCcw, SendHorizontal, X } from "lucide-react";
+import type { ConfigAtendimento } from "@/config/prefeitura";
 
 /**
  * Widget do assistente virtual (Agente de FAQ Municipal).
@@ -23,7 +24,51 @@ type Message = {
   id: number;
   role: "user" | "bot" | "error";
   text: string;
+  /** Resposta em que o assistente não encontrou a informação: oferece atendimento humano. */
+  semResposta?: { pergunta: string };
 };
+
+type ChatwootSDK = {
+  run: (opts: { websiteToken: string; baseUrl: string }) => void;
+};
+type Chatwoot = {
+  toggle: (state?: "open" | "close") => void;
+  setConversationCustomAttributes: (attrs: Record<string, string>) => void;
+};
+declare global {
+  interface Window {
+    chatwootSDK?: ChatwootSDK;
+    $chatwoot?: Chatwoot;
+    chatwootSettings?: Record<string, unknown>;
+  }
+}
+
+/**
+ * Abre o widget do Chatwoot na caixa da secretaria e anexa à conversa a pergunta
+ * que o assistente não respondeu, para o atendente não precisar perguntar de novo.
+ * O SDK é carregado só no primeiro uso; uma página comporta uma caixa só.
+ */
+let chatwootToken: string | null = null;
+function abrirAtendimento(baseUrl: string, websiteToken: string, contexto: Record<string, string>) {
+  const abrir = () => {
+    window.$chatwoot?.setConversationCustomAttributes(contexto);
+    window.$chatwoot?.toggle("open");
+  };
+  if (chatwootToken === websiteToken && window.$chatwoot) return abrir();
+  if (chatwootToken !== null && chatwootToken !== websiteToken) {
+    // Outra secretaria já carregou o widget: recarregar é o jeito suportado de trocar de caixa.
+    window.location.reload();
+    return;
+  }
+  chatwootToken = websiteToken;
+  window.chatwootSettings = { hideMessageBubble: true, locale: "pt_BR", position: "right" };
+  window.addEventListener("chatwoot:ready", abrir, { once: true });
+  const script = document.createElement("script");
+  script.src = `${baseUrl.replace(/\/+$/, "")}/packs/js/sdk.js`;
+  script.async = true;
+  script.onload = () => window.chatwootSDK?.run({ websiteToken, baseUrl });
+  document.body.appendChild(script);
+}
 
 // Depois deste tempo sem resposta, avisa que o LLM pode demorar.
 const SLOW_HINT_MS = 6_000;
@@ -57,6 +102,7 @@ type ChatWidgetProps = {
   titulo: string;
   rotuloBotao: string;
   aviso: string;
+  atendimento?: ConfigAtendimento;
 };
 
 export default function ChatWidget({
@@ -64,6 +110,7 @@ export default function ChatWidget({
   titulo,
   rotuloBotao,
   aviso,
+  atendimento,
 }: ChatWidgetProps) {
   // O botão só aparece depois de confirmar que o servidor tem agente configurado.
   const [disponivel, setDisponivel] = useState(false);
@@ -213,11 +260,10 @@ export default function ChatWidget({
         return;
       }
       if (!r.ok) throw new Error(String(r.status));
-      const data: { answer: string } = await r.json();
-      setMessages((m) => [
-        ...m,
-        msg("bot", data.answer || "Não consegui responder agora."),
-      ]);
+      const data: { answer: string; respondida?: boolean } = await r.json();
+      const resposta = msg("bot", data.answer || "Não consegui responder agora.");
+      if (data.respondida === false) resposta.semResposta = { pergunta: question };
+      setMessages((m) => [...m, resposta]);
     } catch {
       if (controller.signal.aborted) return; // trocou de secretaria ou fechou
       setMessages((m) => [
@@ -234,6 +280,24 @@ export default function ChatWidget({
     }
   }
 
+  const caixa = current && atendimento?.caixas[current.slug];
+
+  function repetirPergunta(pergunta: string) {
+    setInput(pergunta);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }
+
+  function falarComAtendente(pergunta: string, respostaBot: string) {
+    if (!atendimento || !caixa || !current) return;
+    abrirAtendimento(atendimento.url, caixa, {
+      secretaria: current.label,
+      pergunta_ao_assistente: pergunta,
+      resposta_do_assistente: respostaBot.slice(0, 500),
+    });
+    closeChat();
+  }
+
+  const lastId = messages.length ? messages[messages.length - 1].id : -1;
   const onlyWelcome = messages.length === 1 && messages[0].role === "bot";
 
   return (
@@ -346,7 +410,34 @@ export default function ChatWidget({
               >
                 {m.role === "bot" ? <RichText text={m.text} /> : m.text}
               </div>
-            ))}
+            )).flatMap((el, i) => {
+              const m = messages[i];
+              if (!m.semResposta || m.id !== lastId || busy) return [el];
+              const { pergunta } = m.semResposta;
+              return [
+                el,
+                <div key={`acoes-${m.id}`} className="flex flex-wrap gap-2 self-start">
+                  {caixa && (
+                    <button
+                      type="button"
+                      onClick={() => falarComAtendente(pergunta, m.text)}
+                      className="flex items-center gap-1.5 rounded-full bg-primaria-600 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2"
+                    >
+                      <Headset className="h-4 w-4" aria-hidden="true" />
+                      Falar com atendente
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => repetirPergunta(pergunta)}
+                    className="flex items-center gap-1.5 rounded-full border border-primaria-100 bg-white px-3.5 py-1.5 text-sm font-medium text-primaria-700 hover:bg-primaria-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
+                  >
+                    <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                    Repetir a pergunta
+                  </button>
+                </div>,
+              ];
+            })}
 
             {busy && (
               <div className="self-start rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-500 shadow-sm">

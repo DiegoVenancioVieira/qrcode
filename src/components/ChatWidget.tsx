@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Bot, Headset, Loader2, MessageCircle, RotateCcw, SendHorizontal, X } from "lucide-react";
 import type { ConfigAtendimento } from "@/config/prefeitura";
+import { EVENTO_ABRIR_ASSISTENTE } from "@/components/BotaoAssistente";
 
 /**
  * Widget do assistente virtual (Agente de FAQ Municipal).
@@ -158,6 +159,14 @@ export default function ChatWidget({
     if (!secretarias) loadSecretarias();
   }
 
+  // O cartão de destaque da página abre o mesmo painel.
+  useEffect(() => {
+    if (!disponivel) return;
+    const abrir = () => openChat();
+    window.addEventListener(EVENTO_ABRIR_ASSISTENTE, abrir);
+    return () => window.removeEventListener(EVENTO_ABRIR_ASSISTENTE, abrir);
+  });
+
   // Fechar cancela a pergunta em andamento: não faz sentido o agente (em CPU)
   // continuar processando uma resposta que ninguém vai ler.
   const closeChat = useCallback(() => {
@@ -307,11 +316,12 @@ export default function ChatWidget({
           ref={launcherRef}
           type="button"
           onClick={openChat}
-          className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-primaria-600 py-3 pr-5 pl-4 font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 active:scale-95"
+          className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primaria-600 text-white shadow-lg shadow-primaria-900/30 transition-all hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 active:scale-95"
           aria-haspopup="dialog"
+          aria-label={rotuloBotao}
+          title={rotuloBotao}
         >
-          <MessageCircle className="h-5 w-5" aria-hidden="true" />
-          {rotuloBotao}
+          <MessageCircle className="h-6 w-6" aria-hidden="true" />
         </button>
       )}
 
@@ -376,7 +386,7 @@ export default function ChatWidget({
           <div
             ref={listRef}
             aria-live="polite"
-            className="flex flex-1 flex-col gap-2 overflow-y-auto px-3 py-4"
+            className="flex flex-1 flex-col gap-2 overflow-y-auto bg-[radial-gradient(circle,rgb(148_163_184/0.18)_1px,transparent_1px)] [background-size:16px_16px] px-3 py-4"
           >
             {!secretarias && !loadError && (
               <div className="flex flex-1 items-center justify-center text-slate-400">

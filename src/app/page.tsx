@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { ChevronRight, ShieldCheck } from "lucide-react";
+import { SearchX, ShieldCheck } from "lucide-react";
+import BotaoAssistente from "@/components/BotaoAssistente";
+import BuscaServicos from "@/components/BuscaServicos";
 import ChatWidget from "@/components/ChatWidget";
 import {
   chat,
@@ -8,79 +10,104 @@ import {
   type ServicoComIcone,
 } from "@/config/prefeitura";
 
+const LISTA_ID = "lista-servicos";
+
 /**
- * Botão de serviço em bloco.
- * Ícone à esquerda (com fundo sutil), textos ao centro e seta à direita.
- * Inclui feedback tátil (afundamento ao toque) para uso predominante em mobile.
+ * Cartão de serviço em grade, no estilo de tela inicial de app: ícone em
+ * destaque e título curto. A descrição fica como dica e entra na busca.
  */
-function ServiceButton({ service }: { service: ServicoComIcone }) {
+function ServiceTile({ service }: { service: ServicoComIcone }) {
   const Icon = service.Icone;
 
   return (
-    <a
-      href={service.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-150 hover:border-primaria-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 active:scale-[0.98]"
-    >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primaria-50 text-primaria-600 transition-colors group-hover:bg-primaria-100">
-        <Icon className="h-5 w-5" aria-hidden="true" />
-      </span>
-
-      <span className="flex min-w-0 flex-1 flex-col text-left">
-        <span className="truncate font-semibold text-slate-800">
+    <li data-busca={`${service.titulo} ${service.descricao}`}>
+      <a
+        href={service.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={service.descricao}
+        className="group flex h-full flex-col items-center gap-2 rounded-2xl bg-white px-2 pt-4 pb-3 text-center shadow-sm ring-1 ring-slate-200/70 transition-all duration-150 hover:shadow-md hover:ring-primaria-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 active:scale-95"
+      >
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primaria-50 text-primaria-600 transition-colors group-hover:bg-primaria-600 group-hover:text-white">
+          <Icon className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <span className="line-clamp-2 text-[13px] leading-tight font-semibold text-slate-700">
           {service.titulo}
         </span>
-        <span className="truncate text-sm text-slate-500">
-          {service.descricao}
-        </span>
-      </span>
-
-      <ChevronRight
-        className="h-5 w-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primaria-600"
-        aria-hidden="true"
-      />
-    </a>
+        <span className="sr-only">{service.descricao}</span>
+      </a>
+    </li>
   );
 }
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 px-4 pt-10 pb-24">
-      <div className="flex w-full max-w-md flex-1 flex-col">
-        {/* Cabeçalho */}
-        <header className="flex flex-col items-center text-center">
-          <div className="relative h-24 w-24 overflow-hidden rounded-full bg-white shadow-md ring-4 ring-primaria-500/80">
-            <Image
-              src={prefeitura.marca.logo}
-              alt={prefeitura.marca.logoAlt}
-              fill
-              sizes="96px"
-              className="object-cover"
-              priority
-            />
+    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 pb-28">
+      {/* Cabeçalho com a identidade da prefeitura e a busca */}
+      <header className="w-full rounded-b-[2rem] bg-gradient-to-br from-primaria-700 via-primaria-600 to-primaria-500 px-4 pt-8 pb-16 text-white">
+        <div className="mx-auto flex max-w-md flex-col gap-6">
+          <div className="flex items-center gap-3">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white p-1 shadow-md">
+              <Image
+                src={prefeitura.marca.logo}
+                alt={prefeitura.marca.logoAlt}
+                fill
+                sizes="56px"
+                className="object-contain p-1"
+                priority
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium tracking-wide text-white/75 uppercase">
+                Serviços digitais
+              </p>
+              <h1 className="truncate text-lg leading-tight font-bold">
+                {prefeitura.prefeitura.nome}
+              </h1>
+            </div>
           </div>
 
-          <h1 className="mt-4 text-xl font-bold text-slate-800">
-            {prefeitura.prefeitura.nome}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {prefeitura.textos.subtitulo}
-          </p>
-        </header>
+          <div>
+            <p className="text-2xl leading-snug font-bold">Olá! Como podemos ajudar?</p>
+            <p className="mt-1 text-sm text-white/80">{prefeitura.textos.subtitulo}</p>
+          </div>
 
-        {/* Lista de serviços */}
-        <nav
-          aria-label={prefeitura.textos.rotuloListaServicos}
-          className="mt-8 flex flex-col gap-3"
-        >
-          {servicos.map((service) => (
-            <ServiceButton key={service.id} service={service} />
-          ))}
-        </nav>
+          <BuscaServicos alvo={LISTA_ID} />
+        </div>
+      </header>
+
+      <div className="relative z-10 -mt-10 flex w-full max-w-md flex-1 flex-col gap-6 px-4">
+        {chat.habilitado && <BotaoAssistente titulo={chat.titulo} />}
+
+        <section aria-labelledby="titulo-servicos">
+          <h2
+            id="titulo-servicos"
+            className={`mb-3 px-1 text-sm font-semibold tracking-wide text-slate-500 uppercase ${
+              chat.habilitado ? "" : "mt-14"
+            }`}
+          >
+            Serviços
+          </h2>
+          <nav aria-label={prefeitura.textos.rotuloListaServicos}>
+            <ul id={LISTA_ID} className="grid grid-cols-3 gap-3">
+              {servicos.map((service) => (
+                <ServiceTile key={service.id} service={service} />
+              ))}
+            </ul>
+          </nav>
+          <div
+            id={`${LISTA_ID}-vazio`}
+            hidden
+            className="flex flex-col items-center gap-2 rounded-2xl bg-white px-6 py-8 text-center text-sm text-slate-500 ring-1 ring-slate-200/70"
+          >
+            <SearchX className="h-6 w-6 text-slate-400" aria-hidden="true" />
+            Nenhum serviço encontrado.
+            {chat.habilitado && " Pergunte ao assistente virtual."}
+          </div>
+        </section>
 
         {/* Rodapé */}
-        <footer className="mt-auto pt-10 text-center">
+        <footer className="mt-auto pt-6 text-center">
           <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{prefeitura.textos.seloSeguranca}</span>

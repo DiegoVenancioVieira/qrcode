@@ -30,6 +30,8 @@ export const metadata: Metadata = {
   },
 };
 
+const SCRIPT_TEMA = `try{var t=localStorage.getItem("tema");if(t==="escuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`;
+
 export const viewport: Viewport = {
   themeColor: prefeitura.tema.primaria["600"],
   width: "device-width",
@@ -42,7 +44,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={prefeitura.site.idioma} style={variaveisDoTema()}>
+    <html lang={prefeitura.site.idioma} style={variaveisDoTema()} suppressHydrationWarning>
+      <head>
+        {/* Aplica o tema antes da pintura para não piscar: escolha salva ou a do sistema. */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body className={`${geistSans.variable} antialiased`}>{children}</body>
     </html>
   );

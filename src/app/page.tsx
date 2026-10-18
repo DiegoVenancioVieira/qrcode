@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { SearchX, ShieldCheck } from "lucide-react";
+import AlternarTema from "@/components/AlternarTema";
 import BotaoAssistente from "@/components/BotaoAssistente";
 import BuscaServicos from "@/components/BuscaServicos";
 import ChatWidget from "@/components/ChatWidget";
@@ -26,12 +27,12 @@ function ServiceTile({ service }: { service: ServicoComIcone }) {
         target="_blank"
         rel="noopener noreferrer"
         title={service.descricao}
-        className="group flex h-full flex-col items-center gap-2 rounded-2xl bg-white px-2 pt-4 pb-3 text-center shadow-sm ring-1 ring-slate-200/70 transition-all duration-150 hover:shadow-md hover:ring-primaria-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 active:scale-95"
+        className="group flex h-full flex-col items-center gap-2 rounded-2xl bg-white dark:bg-slate-900 px-2 pt-4 pb-3 text-center shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-800 transition-all duration-150 hover:shadow-md hover:ring-primaria-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 active:scale-95"
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primaria-50 text-primaria-600 transition-colors group-hover:bg-primaria-600 group-hover:text-white">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primaria-50 dark:bg-primaria-500/15 text-primaria-600 dark:text-primaria-300 transition-colors group-hover:bg-primaria-600 group-hover:text-white">
           <Icon className="h-6 w-6" aria-hidden="true" />
         </span>
-        <span className="line-clamp-2 text-[13px] leading-tight font-semibold text-slate-700">
+        <span className="line-clamp-2 text-[13px] leading-tight font-semibold text-slate-700 dark:text-slate-200">
           {service.titulo}
         </span>
         <span className="sr-only">{service.descricao}</span>
@@ -42,9 +43,9 @@ function ServiceTile({ service }: { service: ServicoComIcone }) {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 pb-28">
+    <main className="flex min-h-screen w-full flex-col items-center bg-slate-100 dark:bg-slate-950 pb-28">
       {/* Cabeçalho com a identidade da prefeitura e a busca */}
-      <header className="w-full rounded-b-[2rem] bg-gradient-to-br from-primaria-700 via-primaria-600 to-primaria-500 px-4 pt-8 pb-16 text-white">
+      <header className="w-full rounded-b-[2rem] bg-gradient-to-br from-primaria-700 via-primaria-600 to-primaria-500 px-4 dark:from-slate-900 dark:via-primaria-700 dark:to-primaria-600 pt-8 pb-16 text-white">
         <div className="mx-auto flex max-w-md flex-col gap-6">
           <div className="flex items-center gap-3">
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white p-1 shadow-md">
@@ -57,7 +58,7 @@ export default function Home() {
                 priority
               />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-medium tracking-wide text-white/75 uppercase">
                 Serviços digitais
               </p>
@@ -65,6 +66,7 @@ export default function Home() {
                 {prefeitura.prefeitura.nome}
               </h1>
             </div>
+            <AlternarTema />
           </div>
 
           <div>
@@ -98,9 +100,9 @@ export default function Home() {
           <div
             id={`${LISTA_ID}-vazio`}
             hidden
-            className="flex flex-col items-center gap-2 rounded-2xl bg-white px-6 py-8 text-center text-sm text-slate-500 ring-1 ring-slate-200/70"
+            className="flex flex-col items-center gap-2 rounded-2xl bg-white dark:bg-slate-900 px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400 ring-1 ring-slate-200/70 dark:ring-slate-800"
           >
-            <SearchX className="h-6 w-6 text-slate-400" aria-hidden="true" />
+            <SearchX className="h-6 w-6 text-slate-400 dark:text-slate-500" aria-hidden="true" />
             Nenhum serviço encontrado.
             {chat.habilitado && " Pergunte ao assistente virtual."}
           </div>
@@ -108,11 +110,11 @@ export default function Home() {
 
         {/* Rodapé */}
         <footer className="mt-auto pt-6 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
+          <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{prefeitura.textos.seloSeguranca}</span>
           </div>
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
             © {new Date().getFullYear()} {prefeitura.prefeitura.nomeOficial}
           </p>
         </footer>

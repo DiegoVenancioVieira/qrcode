@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tema escuro por classe no <html> (escolha do cidadão ou do sistema; ver layout.tsx). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * Cor primária da prefeitura. Os valores vêm de `config/prefeituras/<slug>.json`
  * (tema.primaria) e são injetados como variáveis CSS no <html> pelo layout.
@@ -28,4 +31,8 @@ body {
 
 a {
   text-decoration: none;
+}
+
+html.dark {
+  color-scheme: dark;
 }

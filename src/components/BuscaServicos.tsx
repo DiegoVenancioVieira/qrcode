@@ -32,7 +32,7 @@ export default function BuscaServicos({ alvo }: { alvo: string }) {
   return (
     <div className="relative">
       <Search
-        className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500"
         aria-hidden="true"
       />
       <label htmlFor="busca-servicos" className="sr-only">
@@ -45,13 +45,13 @@ export default function BuscaServicos({ alvo }: { alvo: string }) {
         onChange={(e) => filtrar(e.target.value)}
         placeholder="Buscar serviço…"
         autoComplete="off"
-        className="h-12 w-full rounded-2xl border-0 bg-white pr-11 pl-12 text-base text-slate-800 shadow-lg shadow-slate-900/10 placeholder:text-slate-400 focus:ring-2 focus:ring-white/70 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        className="h-12 w-full rounded-2xl border-0 bg-white dark:bg-slate-900 pr-11 pl-12 text-base text-slate-800 dark:text-slate-100 shadow-lg shadow-slate-900/10 placeholder:text-slate-400 focus:ring-2 focus:ring-white/70 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
       />
       {termo && (
         <button
           type="button"
           onClick={() => filtrar("")}
-          className="absolute top-1/2 right-3 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          className="absolute top-1/2 right-3 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600"
           aria-label="Limpar busca"
         >
           <X className="h-4 w-4" aria-hidden="true" />

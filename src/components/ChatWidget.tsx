@@ -262,11 +262,21 @@ export default function ChatWidget({
         signal: controller.signal,
       });
       if (r.status === 429) {
+        const d: { detail?: string } = await r.json().catch(() => ({}));
         setMessages((m) => [
           ...m,
-          msg("error", "Muitas perguntas em pouco tempo. Aguarde um minuto e tente novamente."),
+          msg("error", d.detail || "Muitas perguntas em pouco tempo. Aguarde um minuto e tente novamente."),
         ]);
         return;
+      }
+      if (r.status === 503) {
+        const d: { detail?: string; limite?: boolean } = await r.json().catch(() => ({}));
+        if (d.limite) {
+          const aviso = msg("bot", d.detail || "O assistente está indisponível agora.");
+          aviso.semResposta = { pergunta: question };
+          setMessages((m) => [...m, aviso]);
+          return;
+        }
       }
       if (!r.ok) throw new Error(String(r.status));
       const data: { answer: string; respondida?: boolean } = await r.json();
@@ -331,7 +341,7 @@ export default function ChatWidget({
           role="dialog"
           aria-modal="true"
           aria-label={`${titulo} — ${nomePrefeitura}`}
-          className="fixed inset-0 z-50 flex flex-col bg-slate-50 sm:inset-auto sm:right-4 sm:bottom-4 sm:h-[min(640px,calc(100vh-2rem))] sm:w-[400px] sm:overflow-hidden sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-2xl"
+          className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950 sm:inset-auto sm:right-4 sm:bottom-4 sm:h-[min(640px,calc(100vh-2rem))] sm:w-[400px] sm:overflow-hidden sm:rounded-2xl sm:border sm:border-slate-200 dark:sm:border-slate-700 sm:shadow-2xl"
         >
           {/* Cabeçalho */}
           <header className="flex items-center gap-3 bg-primaria-600 px-4 py-3 text-white">
@@ -359,7 +369,7 @@ export default function ChatWidget({
             <div
               role="group"
               aria-label="Escolha a secretaria"
-              className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-3 py-2 [scrollbar-width:none]"
+              className="flex gap-2 overflow-x-auto border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 [scrollbar-width:none]"
             >
               {secretarias.map((s) => {
                 const active = s.slug === current?.slug;
@@ -372,7 +382,7 @@ export default function ChatWidget({
                     className={`shrink-0 rounded-full border px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 ${
                       active
                         ? "border-primaria-600 bg-primaria-600 text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-primaria-300 hover:text-primaria-700"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-primaria-300 hover:text-primaria-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-primaria-300"
                     }`}
                   >
                     {s.label}
@@ -389,18 +399,18 @@ export default function ChatWidget({
             className="flex flex-1 flex-col gap-2 overflow-y-auto bg-[radial-gradient(circle,rgb(148_163_184/0.18)_1px,transparent_1px)] [background-size:16px_16px] px-3 py-4"
           >
             {!secretarias && !loadError && (
-              <div className="flex flex-1 items-center justify-center text-slate-400">
+              <div className="flex flex-1 items-center justify-center text-slate-400 dark:text-slate-500">
                 <Loader2 className="h-6 w-6 animate-spin" aria-label="Carregando" />
               </div>
             )}
 
             {loadError && (
-              <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-sm text-slate-500">
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 <p>O assistente está indisponível no momento.</p>
                 <button
                   type="button"
                   onClick={loadSecretarias}
-                  className="rounded-full border border-primaria-600 px-4 py-1.5 font-medium text-primaria-700 hover:bg-primaria-50"
+                  className="rounded-full border border-primaria-600 px-4 py-1.5 font-medium text-primaria-700 dark:text-primaria-300 hover:bg-primaria-50 dark:hover:bg-primaria-500/15"
                 >
                   Tentar novamente
                 </button>
@@ -414,8 +424,8 @@ export default function ChatWidget({
                   m.role === "user"
                     ? "self-end rounded-br-md bg-primaria-600 text-white"
                     : m.role === "bot"
-                      ? "self-start rounded-bl-md border border-slate-200 bg-white text-slate-800"
-                      : "self-start rounded-bl-md border border-red-200 bg-red-50 text-red-700"
+                      ? "self-start rounded-bl-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100"
+                      : "self-start rounded-bl-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                 }`}
               >
                 {m.role === "bot" ? <RichText text={m.text} /> : m.text}
@@ -440,7 +450,7 @@ export default function ChatWidget({
                   <button
                     type="button"
                     onClick={() => repetirPergunta(pergunta)}
-                    className="flex items-center gap-1.5 rounded-full border border-primaria-100 bg-white px-3.5 py-1.5 text-sm font-medium text-primaria-700 hover:bg-primaria-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
+                    className="flex items-center gap-1.5 rounded-full border border-primaria-100 dark:border-primaria-500/30 bg-white dark:bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-primaria-700 dark:text-primaria-300 hover:bg-primaria-50 dark:hover:bg-primaria-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
                   >
                     <RotateCcw className="h-4 w-4" aria-hidden="true" />
                     Repetir a pergunta
@@ -450,7 +460,7 @@ export default function ChatWidget({
             })}
 
             {busy && (
-              <div className="self-start rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-500 shadow-sm">
+              <div className="self-start rounded-2xl rounded-bl-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-500 dark:text-slate-400 shadow-sm">
                 <span className="inline-flex gap-1" aria-label="Digitando">
                   <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
                   <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
@@ -469,7 +479,7 @@ export default function ChatWidget({
                     key={q}
                     type="button"
                     onClick={() => ask(q)}
-                    className="rounded-full border border-primaria-100 bg-white px-3 py-1.5 text-left text-sm text-primaria-700 hover:bg-primaria-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
+                    className="rounded-full border border-primaria-100 dark:border-primaria-500/30 bg-white dark:bg-slate-900 px-3 py-1.5 text-left text-sm text-primaria-700 dark:text-primaria-300 hover:bg-primaria-50 dark:hover:bg-primaria-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
                   >
                     {q}
                   </button>
@@ -484,7 +494,7 @@ export default function ChatWidget({
               e.preventDefault();
               ask(input);
             }}
-            className="border-t border-slate-200 bg-white px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+            className="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
           >
             <div className="flex items-end gap-2">
               <label htmlFor="chat-input" className="sr-only">
@@ -494,7 +504,7 @@ export default function ChatWidget({
                 id="chat-input"
                 ref={inputRef}
                 rows={1}
-                maxLength={1000}
+                maxLength={500}
                 value={input}
                 disabled={!current}
                 onChange={(e) => {
@@ -509,18 +519,18 @@ export default function ChatWidget({
                   }
                 }}
                 placeholder="Digite sua pergunta…"
-                className="max-h-[110px] flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-base text-slate-800 placeholder:text-slate-400 focus:border-primaria-500 focus:bg-white focus:outline-none disabled:opacity-60"
+                className="max-h-[110px] flex-1 resize-none rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-base text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:border-primaria-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none disabled:opacity-60"
               />
               <button
                 type="submit"
                 disabled={busy || !current || input.trim().length < 2}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primaria-600 text-white transition-colors hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 disabled:bg-slate-300"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primaria-600 text-white transition-colors hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 disabled:bg-slate-300 dark:disabled:bg-slate-700"
                 aria-label="Enviar pergunta"
               >
                 <SendHorizontal className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <p className="mt-1.5 text-center text-[11px] leading-snug text-slate-400">
+            <p className="mt-1.5 text-center text-[11px] leading-snug text-slate-400 dark:text-slate-500">
               {aviso}
             </p>
           </form>

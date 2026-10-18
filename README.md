@@ -125,6 +125,13 @@ O botão só aparece quando as duas condições valem:
 - `src/app/api/chat/secretarias/route.ts` — repassa para `GET {agente}/secretarias`.
 - `src/app/api/chat/status/route.ts` — informa se este deploy tem agente.
 
+Proteção contra robôs (créditos do LLM): `/api/chat` só aceita chamadas vindas
+do próprio site (cabeçalho `Origin`), limita perguntas por IP
+(`CHAT_LIMITE_MINUTO`, padrão 5; `CHAT_LIMITE_DIA`, padrão 40) e envia ao agente
+o segredo `AGENTE_TOKEN` (o mesmo `ASK_TOKEN` do agente), de modo que ninguém
+pergunte direto ao agente pulando essas barreiras. O agente ainda tem teto
+diário global (`ASK_DAILY_LIMIT`).
+
 O navegador nunca fala direto com o agente: o endereço dele fica oculto e não há
 bloqueio de conteúdo misto (hub em HTTPS, agente em HTTP).
 
@@ -139,6 +146,12 @@ chat não aparece. O IP do cidadão é repassado
 no `X-Forwarded-For` para o rate-limit do agente valer por pessoa; no agente,
 defina `TRUSTED_PROXIES` com as redes Docker do Traefik e do hub
 (ex.: `172.16.0.0/12,10.0.0.0/8`).
+
+## Tema claro/escuro
+
+Segue o tema do aparelho; o botão no cabeçalho alterna e guarda a escolha no
+`localStorage` (`tema`). O script em `layout.tsx` aplica a classe `dark` antes
+da pintura, sem piscar.
 
 ## Assets
 

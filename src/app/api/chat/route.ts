@@ -1,4 +1,5 @@
 import { agenteBaseUrl, agenteIndisponivel, clientIp } from "@/lib/agente";
+import { limiteExcedido, origemPermitida } from "@/lib/protecao";
 
 // O LLM do agente roda em CPU: uma resposta nova leva de 5 a 20 s, e mais sob fila.
 const TIMEOUT_MS = 150_000;
@@ -8,6 +9,9 @@ const SLUG_RE = /^[a-z0-9_-]{1,40}$/;
 export async function POST(request: Request) {
   const base = agenteBaseUrl();
   if (!base) return agenteIndisponivel();
+  if (!origemPermitida(request)) {
+    return Response.json({ detail: "Origem não permitida" }, { status: 403 });
+  }
 
   let body: { question?: unknown; secretaria?: unknown };
   try {
@@ -21,9 +25,9 @@ export async function POST(request: Request) {
 
   const question = typeof body.question === "string" ? body.question.trim() : "";
   const secretaria = typeof body.secretaria === "string" ? body.secretaria : "";
-  if (question.length < 2 || question.length > 1000) {
+  if (question.length < 2 || question.length > 500) {
     return Response.json(
-      { detail: "A pergunta deve ter entre 2 e 1000 caracteres." },
+      { detail: "A pergunta deve ter entre 2 e 500 caracteres." },
       { status: 422 },
     );
   }
@@ -31,9 +35,19 @@ export async function POST(request: Request) {
     return Response.json({ detail: "Secretaria inválida" }, { status: 422 });
   }
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
   const ip = clientIp(request.headers);
-  if (ip) headers["X-Forwarded-For"] = ip;
+  // Sem IP identificável (não deveria ocorrer atrás do proxy) todos dividem um balde.
+  const bloqueio = limiteExcedido(ip ?? "desconhecido");
+  if (bloqueio) return Response.json({ detail: bloqueio }, { status: 429 });
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (ip) {
+    headers["X-Forwarded-For"] = ip;
+    headers["X-Cidadao-IP"] = ip;
+  }
+  // Segredo compartilhado com o agente (ASK_TOKEN lá): só o hub consegue perguntar.
+  const token = process.env.AGENTE_TOKEN?.trim();
+  if (token) headers["X-Agente-Token"] = token;
 
   let r: Response;
   try {
@@ -51,6 +65,11 @@ export async function POST(request: Request) {
 
   // 429 (rate-limit) e 404 (secretaria desconhecida) chegam ao widget como estão;
   // demais falhas viram 502 genérico, sem vazar detalhes internos.
+  // 503 com detalhe = teto diário do agente; o widget oferece o atendente humano.
+  if (r.status === 503) {
+    const d = await r.json().catch(() => ({}));
+    return Response.json({ detail: d.detail, limite: true }, { status: 503 });
+  }
   if (r.status === 429 || r.status === 404) {
     return Response.json(await r.json().catch(() => ({})), { status: r.status });
   }

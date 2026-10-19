@@ -131,9 +131,7 @@
     "atendimento": {
       "url": "https://araua-virtual.candidatosinteligentes.com.br",
       "caixas": {
-        "teste": "ydPpYfvtCKCgb213TGwGJcXV",
-        "educacao": "ydPpYfvtCKCgb213TGwGJcXV",
-        "assistencia-social": "ydPpYfvtCKCgb213TGwGJcXV"
+        "*": "ydPpYfvtCKCgb213TGwGJcXV"
       }
     }
   }

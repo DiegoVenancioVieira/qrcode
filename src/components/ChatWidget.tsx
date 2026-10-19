@@ -26,8 +26,15 @@ type Message = {
   role: "user" | "bot" | "error";
   text: string;
   /** Resposta em que o assistente não encontrou a informação: oferece atendimento humano. */
-  semResposta?: { pergunta: string };
+  semResposta?: { pergunta: string; secretaria: string };
+  /** Secretaria que respondeu (modo automático): aparece como etiqueta na resposta. */
+  origem?: string;
+  /** Roteador em dúvida: secretarias para o cidadão escolher, refazendo a pergunta. */
+  opcoes?: { pergunta: string; secretarias: Secretaria[] };
 };
+
+/** "Todas" no seletor: o agente descobre a secretaria de cada pergunta. */
+const AUTOMATICO = "";
 
 type ChatwootSDK = {
   run: (opts: { websiteToken: string; baseUrl: string }) => void;
@@ -129,6 +136,7 @@ export default function ChatWidget({
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [slow, setSlow] = useState(false);
+  const [equipeGeral, setEquipeGeral] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -150,10 +158,19 @@ export default function ChatWidget({
     try {
       const r = await fetch("/api/chat/secretarias");
       if (!r.ok) throw new Error(String(r.status));
-      const data: { secretarias: Secretaria[] } = await r.json();
+      const data: {
+        secretarias: Secretaria[];
+        automatico?: { welcome: string; chips: string[]; equipeGeral: string };
+      } = await r.json();
       if (!data.secretarias?.length) throw new Error("vazio");
-      setSecretarias(data.secretarias);
-      selectSecretaria(data.secretarias[0]);
+      // Com roteamento no agente, a primeira opção é "Todas": o cidadão não precisa
+      // saber qual secretaria trata do assunto.
+      const lista = data.automatico
+        ? [{ slug: AUTOMATICO, label: "Todas", welcome: data.automatico.welcome, chips: data.automatico.chips }, ...data.secretarias]
+        : data.secretarias;
+      setEquipeGeral(data.automatico?.equipeGeral ?? null);
+      setSecretarias(lista);
+      selectSecretaria(lista[0]);
     } catch {
       setLoadError(true);
     }
@@ -247,9 +264,10 @@ export default function ChatWidget({
     };
   }, []);
 
-  async function ask(raw: string) {
+  async function ask(raw: string, forcar?: Secretaria) {
     const question = raw.trim();
     if (busy || !current || question.length < 2) return;
+    const alvo = forcar ?? current;
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -264,7 +282,7 @@ export default function ChatWidget({
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, secretaria: current.slug }),
+        body: JSON.stringify({ question, secretaria: alvo.slug || undefined }),
         signal: controller.signal,
       });
       if (r.status === 429) {
@@ -279,15 +297,34 @@ export default function ChatWidget({
         const d: { detail?: string; limite?: boolean } = await r.json().catch(() => ({}));
         if (d.limite) {
           const aviso = msg("bot", d.detail || "O assistente está indisponível agora.");
-          aviso.semResposta = { pergunta: question };
+          aviso.semResposta = {
+            pergunta: question,
+            secretaria: (alvo.slug ? alvo.label : equipeGeral) || alvo.label,
+          };
           setMessages((m) => [...m, aviso]);
           return;
         }
       }
       if (!r.ok) throw new Error(String(r.status));
-      const data: { answer: string; respondida?: boolean } = await r.json();
+      const data: {
+        answer: string;
+        respondida?: boolean;
+        secretaria?: string | null;
+        secretaria_label?: string | null;
+        opcoes?: string[] | null;
+      } = await r.json();
       const resposta = msg("bot", data.answer || "Não consegui responder agora.");
-      if (data.respondida === false) resposta.semResposta = { pergunta: question };
+      // No modo "Todas" mostra de qual secretaria veio a resposta.
+      if (!alvo.slug && data.secretaria_label) resposta.origem = data.secretaria_label;
+      const escolhas = (data.opcoes ?? [])
+        .map((slug) => secretarias?.find((s) => s.slug === slug))
+        .filter((s): s is Secretaria => Boolean(s));
+      if (escolhas.length) resposta.opcoes = { pergunta: question, secretarias: escolhas };
+      if (data.respondida === false) {
+        // Sem secretaria detectada, o atendimento vai para a equipe geral (triagem).
+        const destino = data.secretaria_label || (alvo.slug ? alvo.label : equipeGeral) || alvo.label;
+        resposta.semResposta = { pergunta: question, secretaria: destino };
+      }
       setMessages((m) => [...m, resposta]);
     } catch {
       if (controller.signal.aborted) return; // trocou de secretaria ou fechou
@@ -305,17 +342,19 @@ export default function ChatWidget({
     }
   }
 
-  const caixa = current && atendimento?.caixas[current.slug];
+  // Caixa do Chatwoot: a da secretaria ou a padrão ("*"), que atende todas pelas equipes.
+  const caixaDe = (slug: string) => atendimento?.caixas[slug] ?? atendimento?.caixas["*"];
+  const caixa = current ? caixaDe(current.slug) : undefined;
 
   function repetirPergunta(pergunta: string) {
     setInput(pergunta);
     requestAnimationFrame(() => inputRef.current?.focus());
   }
 
-  function falarComAtendente(pergunta: string, respostaBot: string) {
+  function falarComAtendente(pergunta: string, respostaBot: string, secretaria: string) {
     if (!atendimento || !caixa || !current) return;
     abrirAtendimento(atendimento.url, caixa, {
-      secretaria: current.label,
+      secretaria,
       pergunta_ao_assistente: pergunta,
       resposta_do_assistente: respostaBot.slice(0, 500),
     });
@@ -357,7 +396,7 @@ export default function ChatWidget({
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold leading-tight">{titulo}</p>
               <p className="truncate text-xs text-white/80">
-                {busy ? "digitando…" : current ? current.label : nomePrefeitura}
+                {busy ? "digitando…" : current?.slug ? current.label : nomePrefeitura}
               </p>
             </div>
             <button
@@ -434,19 +473,42 @@ export default function ChatWidget({
                       : "self-start rounded-bl-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                 }`}
               >
+                {m.origem && (
+                  <span className="mb-1 block text-xs font-semibold text-primaria-600 dark:text-primaria-300">
+                    {m.origem}
+                  </span>
+                )}
                 {m.role === "bot" ? <RichText text={m.text} /> : m.text}
               </div>
             )).flatMap((el, i) => {
               const m = messages[i];
+              if (m.opcoes && m.id === lastId && !busy) {
+                const { pergunta, secretarias: escolhas } = m.opcoes;
+                return [
+                  el,
+                  <div key={`opcoes-${m.id}`} className="flex flex-wrap gap-2 self-start">
+                    {escolhas.map((s) => (
+                      <button
+                        key={s.slug}
+                        type="button"
+                        onClick={() => ask(pergunta, s)}
+                        className="rounded-full border border-primaria-100 dark:border-primaria-500/30 bg-white dark:bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-primaria-700 dark:text-primaria-300 hover:bg-primaria-50 dark:hover:bg-primaria-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>,
+                ];
+              }
               if (!m.semResposta || m.id !== lastId || busy) return [el];
-              const { pergunta } = m.semResposta;
+              const { pergunta, secretaria } = m.semResposta;
               return [
                 el,
                 <div key={`acoes-${m.id}`} className="flex flex-wrap gap-2 self-start">
                   {caixa && (
                     <button
                       type="button"
-                      onClick={() => falarComAtendente(pergunta, m.text)}
+                      onClick={() => falarComAtendente(pergunta, m.text, secretaria)}
                       className="flex items-center gap-1.5 rounded-full bg-primaria-600 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2"
                     >
                       <Headset className="h-4 w-4" aria-hidden="true" />

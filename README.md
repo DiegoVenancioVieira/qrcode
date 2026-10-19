@@ -72,7 +72,7 @@ compartilhamento. Para forçar outro endereço, defina `SITE_URL` (também como
 | `chat.habilitado` | Liga o assistente virtual (opcional; seção ausente = desligado). O botão só aparece se o servidor também tiver `AGENTE_API_URL` |
 | `chat.titulo` / `chat.rotuloBotao` | Título do painel do chat e texto do botão flutuante |
 | `chat.aviso` | Aviso de IA/privacidade abaixo do campo de digitação |
-| `chat.atendimento` | Opcional. Atendimento humano no Chatwoot: `url` do Chatwoot e `caixas` `{secretaria: websiteToken}`. Recomendado: todas as secretarias apontando para a mesma caixa "Prefeitura" e, no Chatwoot, uma equipe por secretaria com uma automação "conversa criada + atributo de contato `secretaria` = <nome> → atribuir equipe". Quando o assistente não encontra a resposta, aparecem os botões "Falar com atendente" (abre a caixa da secretaria com a pergunta anexada à conversa) e "Repetir a pergunta" |
+| `chat.atendimento` | Opcional. Atendimento humano no Chatwoot: `url` do Chatwoot e `caixas` `{secretaria: websiteToken}`. A chave `"*"` vale para todas as secretarias e para o atendimento geral. Recomendado: uma única caixa "Prefeitura" (`{"*": token}`) e, no Chatwoot, uma equipe por secretaria com uma automação "conversa criada + atributo de contato `secretaria` = <nome> → atribuir equipe". Quando o assistente não encontra a resposta, aparecem os botões "Falar com atendente" (abre a caixa da secretaria com a pergunta anexada à conversa) e "Repetir a pergunta" |
 
 O campo `icone` aceita o nome de qualquer ícone do
 [lucide](https://lucide.dev/icons) em PascalCase (ex.: `Landmark`,
@@ -146,6 +146,14 @@ chat não aparece. O IP do cidadão é repassado
 no `X-Forwarded-For` para o rate-limit do agente valer por pessoa; no agente,
 defina `TRUSTED_PROXIES` com as redes Docker do Traefik e do hub
 (ex.: `172.16.0.0/12,10.0.0.0/8`).
+
+## Roteamento automático
+
+Quando o agente tem a seção `roteamento`, o chat abre em **Todas**: o cidadão pergunta
+sem escolher secretaria, o agente descobre a secretaria certa e a resposta mostra de
+qual secretaria veio. Em dúvida, o chat oferece as secretarias possíveis como botões; se
+nenhuma trata do assunto, "Falar com atendente" vai para a equipe geral do Chatwoot.
+As abas das secretarias continuam como atalho opcional.
 
 ## Tema claro/escuro
 

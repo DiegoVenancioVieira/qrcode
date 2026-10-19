@@ -75,7 +75,14 @@ export async function POST(request: Request) {
   }
   if (!r.ok) return agenteIndisponivel(502);
 
-  let data: { answer?: unknown; cached?: unknown; respondida?: unknown };
+  let data: {
+    answer?: unknown;
+    cached?: unknown;
+    respondida?: unknown;
+    secretaria?: unknown;
+    secretaria_label?: unknown;
+    opcoes?: unknown;
+  };
   try {
     data = await r.json();
   } catch {
@@ -87,5 +94,9 @@ export async function POST(request: Request) {
     cached: Boolean(data.cached),
     // Agentes antigos não mandam o campo: trata como respondida.
     respondida: data.respondida !== false,
+    // Roteamento automático: qual secretaria respondeu, ou opções quando em dúvida.
+    secretaria: typeof data.secretaria === "string" ? data.secretaria : null,
+    secretaria_label: typeof data.secretaria_label === "string" ? data.secretaria_label : null,
+    opcoes: Array.isArray(data.opcoes) ? data.opcoes.filter((o) => typeof o === "string") : null,
   });
 }

@@ -72,7 +72,7 @@ compartilhamento. Para forçar outro endereço, defina `SITE_URL` (também como
 | `chat.habilitado` | Liga o assistente virtual (opcional; seção ausente = desligado). O botão só aparece se o servidor também tiver `AGENTE_API_URL` |
 | `chat.titulo` / `chat.rotuloBotao` | Título do painel do chat e texto do botão flutuante |
 | `chat.aviso` | Aviso de IA/privacidade abaixo do campo de digitação |
-| `chat.atendimento` | Opcional. Atendimento humano no Chatwoot: `url` do Chatwoot e `caixas` `{secretaria: websiteToken}`. Quando o assistente não encontra a resposta, aparecem os botões "Falar com atendente" (abre a caixa da secretaria com a pergunta anexada à conversa) e "Repetir a pergunta" |
+| `chat.atendimento` | Opcional. Atendimento humano no Chatwoot: `url` do Chatwoot e `caixas` `{secretaria: websiteToken}`. Recomendado: todas as secretarias apontando para a mesma caixa "Prefeitura" e, no Chatwoot, uma equipe por secretaria com uma automação "conversa criada + atributo de contato `secretaria` = <nome> → atribuir equipe". Quando o assistente não encontra a resposta, aparecem os botões "Falar com atendente" (abre a caixa da secretaria com a pergunta anexada à conversa) e "Repetir a pergunta" |
 
 O campo `icone` aceita o nome de qualquer ícone do
 [lucide](https://lucide.dev/icons) em PascalCase (ex.: `Landmark`,

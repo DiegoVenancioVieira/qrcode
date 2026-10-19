@@ -34,6 +34,7 @@ type ChatwootSDK = {
 };
 type Chatwoot = {
   toggle: (state?: "open" | "close") => void;
+  setCustomAttributes: (attrs: Record<string, string>) => void;
   setConversationCustomAttributes: (attrs: Record<string, string>) => void;
 };
 declare global {
@@ -47,11 +48,16 @@ declare global {
 /**
  * Abre o widget do Chatwoot na caixa da secretaria e anexa à conversa a pergunta
  * que o assistente não respondeu, para o atendente não precisar perguntar de novo.
- * O SDK é carregado só no primeiro uso; uma página comporta uma caixa só.
+ * O SDK é carregado só no primeiro uso; uma página comporta uma caixa só (por isso
+ * o ideal é uma caixa para a prefeitura e uma equipe por secretaria no Chatwoot).
  */
 let chatwootToken: string | null = null;
 function abrirAtendimento(baseUrl: string, websiteToken: string, contexto: Record<string, string>) {
   const abrir = () => {
+    // Atributos do contato existem antes da conversa: a automação do Chatwoot lê
+    // "secretaria" ao criar a conversa e a direciona para a equipe certa (uma caixa
+    // só, uma equipe por secretaria). Numa conversa já aberta, anexa também a ela.
+    window.$chatwoot?.setCustomAttributes(contexto);
     window.$chatwoot?.setConversationCustomAttributes(contexto);
     window.$chatwoot?.toggle("open");
   };

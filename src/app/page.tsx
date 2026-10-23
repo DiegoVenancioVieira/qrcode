@@ -1,8 +1,10 @@
 import Image from "next/image";
-import { ChevronRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, Megaphone, ShieldCheck } from "lucide-react";
 import ChatWidget from "@/components/ChatWidget";
 import {
   chat,
+  ocorrencias,
   prefeitura,
   servicos,
   type ServicoComIcone,
@@ -69,10 +71,27 @@ export default function Home() {
           </p>
         </header>
 
+        {/* Destaque: registro de ocorrências (zeladoria) */}
+        {ocorrencias.habilitado && (
+          <Link
+            href="/ocorrencias"
+            className="group mt-8 flex items-center gap-4 rounded-2xl bg-primaria-600 p-4 text-white shadow-md transition-all hover:bg-primaria-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primaria-500 focus-visible:ring-offset-2 active:scale-[0.98]"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
+              <Megaphone className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col text-left">
+              <span className="truncate font-semibold">{ocorrencias.rotuloBotao}</span>
+              <span className="truncate text-sm text-white/80">{ocorrencias.descricaoBotao}</span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
+        )}
+
         {/* Lista de serviços */}
         <nav
           aria-label={prefeitura.textos.rotuloListaServicos}
-          className="mt-8 flex flex-col gap-3"
+          className={`${ocorrencias.habilitado ? "mt-3" : "mt-8"} flex flex-col gap-3`}
         >
           {servicos.map((service) => (
             <ServiceButton key={service.id} service={service} />

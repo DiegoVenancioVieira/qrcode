@@ -44,6 +44,31 @@ export type ConfigChat = {
   aviso: string;
 };
 
+/** Tipo de problema que o cidadão pode registrar (ex.: poste apagado). */
+export type CategoriaOcorrencia = {
+  /** Identificador estável, gravado no registro (ex.: "iluminacao"). */
+  slug: string;
+  titulo: string;
+  descricao: string;
+  /** Nome de um ícone do lucide-react. */
+  icone: string;
+};
+
+/**
+ * Registro de ocorrências pelo cidadão (zeladoria). Opcional: sem esta seção,
+ * ou com `habilitado: false`, o botão e as páginas de ocorrência não aparecem.
+ */
+export type ConfigOcorrencias = {
+  habilitado: boolean;
+  /** Texto do botão de destaque no hub. */
+  rotuloBotao: string;
+  /** Linha de apoio do botão (ex.: exemplos de problemas). */
+  descricaoBotao: string;
+  /** Aviso de privacidade exibido no formulário. */
+  aviso: string;
+  categorias: CategoriaOcorrencia[];
+};
+
 export type ConfigPrefeitura = {
   prefeitura: {
     /** Nome curto exibido no cabeçalho. */
@@ -79,6 +104,7 @@ export type ConfigPrefeitura = {
   };
   servicos: Servico[];
   chat?: ConfigChat;
+  ocorrencias?: ConfigOcorrencias;
 };
 
 const TONS_PRIMARIA = ["50", "100", "300", "500", "600", "700"] as const;
@@ -141,6 +167,36 @@ function validar(slug: string, config: ConfigPrefeitura): ConfigPrefeitura {
           erros.push(`"chat.${campo}" é obrigatório quando o chat está habilitado.`);
         }
       }
+    }
+  }
+
+  if (config.ocorrencias !== undefined) {
+    const oc = config.ocorrencias;
+    if (typeof oc.habilitado !== "boolean") {
+      erros.push(`"ocorrencias.habilitado" deve ser true ou false.`);
+    }
+    if (oc.habilitado) {
+      for (const campo of ["rotuloBotao", "descricaoBotao", "aviso"] as const) {
+        if (typeof oc[campo] !== "string" || oc[campo].trim() === "") {
+          erros.push(`"ocorrencias.${campo}" é obrigatório quando habilitado.`);
+        }
+      }
+      if (!Array.isArray(oc.categorias) || oc.categorias.length === 0) {
+        erros.push(`"ocorrencias.categorias" precisa de ao menos uma categoria.`);
+      }
+      const slugs = new Set<string>();
+      (oc.categorias ?? []).forEach((cat, i) => {
+        const ref = `ocorrencias.categorias[${i}]`;
+        if (!/^[a-z0-9-]{1,40}$/.test(cat.slug ?? "")) {
+          erros.push(`${ref}: "slug" deve ter letras minúsculas, números ou hífen.`);
+        }
+        if (slugs.has(cat.slug)) erros.push(`${ref}: slug "${cat.slug}" duplicado.`);
+        slugs.add(cat.slug);
+        if (!cat.titulo) erros.push(`${ref}: "titulo" é obrigatório.`);
+        if (!ehIcone(Lucide[cat.icone as keyof typeof Lucide])) {
+          erros.push(`${ref}: ícone "${cat.icone}" não existe no lucide-react.`);
+        }
+      });
     }
   }
 
@@ -222,3 +278,19 @@ export function variaveisDoTema(): Record<string, string> {
     TONS_PRIMARIA.map((tom) => [`--primaria-${tom}`, prefeitura.tema.primaria[tom]]),
   );
 }
+
+/** Configuração de ocorrências; ausente no JSON equivale a desabilitado. */
+export const ocorrencias: ConfigOcorrencias = prefeitura.ocorrencias ?? {
+  habilitado: false,
+  rotuloBotao: "",
+  descricaoBotao: "",
+  aviso: "",
+  categorias: [],
+};
+
+export type CategoriaComIcone = CategoriaOcorrencia & { Icone: LucideIcon };
+
+/** Categorias com o ícone já resolvido (uso em server components). */
+export const categoriasOcorrencia: CategoriaComIcone[] = ocorrencias.categorias.map(
+  (cat) => ({ ...cat, Icone: Lucide[cat.icone as keyof typeof Lucide] as LucideIcon }),
+);

@@ -108,5 +108,73 @@
     "titulo": "Assistente virtual",
     "rotuloBotao": "Tire suas dúvidas",
     "aviso": "Respostas geradas por IA. Não informe dados pessoais — as perguntas podem ser registradas para melhorar o atendimento."
+  },
+  "ocorrencias": {
+    "habilitado": true,
+    "rotuloBotao": "Registrar ocorrência",
+    "descricaoBotao": "Poste apagado, buraco, mato alto e mais",
+    "aviso": "Seu registro será analisado pela Prefeitura. Não envie fotos que identifiquem pessoas. Dados de contato são opcionais e usados apenas para retorno sobre a ocorrência.",
+    "categorias": [
+      {
+        "slug": "iluminacao",
+        "titulo": "Iluminação pública",
+        "descricao": "Poste apagado, piscando ou aceso de dia",
+        "icone": "Lightbulb"
+      },
+      {
+        "slug": "buraco",
+        "titulo": "Buraco na via",
+        "descricao": "Buracos e asfalto danificado",
+        "icone": "Construction"
+      },
+      {
+        "slug": "animais",
+        "titulo": "Animais na via",
+        "descricao": "Animais soltos ou mortos na pista",
+        "icone": "PawPrint"
+      },
+      {
+        "slug": "capina",
+        "titulo": "Capina e roçagem",
+        "descricao": "Mato alto em ruas, praças e terrenos",
+        "icone": "Sprout"
+      },
+      {
+        "slug": "lixo",
+        "titulo": "Lixo e entulho",
+        "descricao": "Coleta não realizada, descarte irregular",
+        "icone": "Trash2"
+      },
+      {
+        "slug": "agua-esgoto",
+        "titulo": "Água e esgoto",
+        "descricao": "Vazamento, esgoto a céu aberto, bueiro",
+        "icone": "Droplets"
+      },
+      {
+        "slug": "arvore",
+        "titulo": "Árvores",
+        "descricao": "Poda, galho caído ou risco de queda",
+        "icone": "TreePine"
+      },
+      {
+        "slug": "sinalizacao",
+        "titulo": "Sinalização e trânsito",
+        "descricao": "Placa, faixa ou semáforo com problema",
+        "icone": "TrafficCone"
+      },
+      {
+        "slug": "calcada",
+        "titulo": "Calçadas e praças",
+        "descricao": "Calçada quebrada, equipamento danificado",
+        "icone": "Footprints"
+      },
+      {
+        "slug": "outros",
+        "titulo": "Outros",
+        "descricao": "Qualquer outro problema na cidade",
+        "icone": "CircleHelp"
+      }
+    ]
   }
 }

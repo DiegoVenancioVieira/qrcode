@@ -15,6 +15,7 @@ build
 .env.*.local
 api_coolify_*
 tokens/
+data
 
 # IDE and editor files
 .vscode

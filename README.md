@@ -98,6 +98,39 @@ As apresentações em `public/*.html|pdf` (Observatório, PGD-AJU, Patrulha
 Maria da Penha, BusAju, MIA, hub) são conteúdo de Aracaju e só são
 referenciadas pela configuração de Aracaju.
 
+## Registro de ocorrências (zeladoria)
+
+O cidadão registra problemas da cidade (poste apagado, buraco, animais na via,
+mato alto, lixo, esgoto, árvores, sinalização, calçadas) direto do celular:
+
+- **`/ocorrencias`**: escolhe a categoria, captura o **GPS** (ou escreve um
+  ponto de referência), descreve o problema e anexa **fotos** (câmera ou
+  galeria, comprimidas no aparelho para ~300 KB), **vídeo** e **áudio**
+  gravado no próprio navegador. Contato é opcional: sem ele o registro é
+  anônimo. Ao enviar, recebe um **protocolo** (ex.: `20261023-K7Q2MX`).
+- **`/ocorrencias/acompanhar`**: consulta pelo protocolo, com a linha do tempo
+  e as notas da Prefeitura. Os protocolos enviados ficam lembrados no aparelho.
+- **`/admin/ocorrencias`**: painel da Prefeitura. Lista com filtros por
+  situação e categoria, fotos/vídeo/áudio, link para o mapa, contato, mudança
+  de situação com nota ao cidadão e exportação **CSV**.
+
+Situações: Recebida → Em análise → Encaminhada à equipe → Resolvida / Não procede.
+
+### Configuração
+
+- Seção `ocorrencias` no JSON da prefeitura: `habilitado`, textos do botão,
+  aviso de privacidade e a lista de `categorias` (`slug`, `titulo`,
+  `descricao`, `icone`). Sem a seção, o recurso não aparece.
+- **`OCORRENCIAS_ADMIN_TOKEN`** (mín. 16 caracteres, gere com
+  `openssl rand -hex 24`): libera o painel. Sem ele o painel fica desativado.
+- **Volume persistente obrigatório em `/app/data`** no Coolify. Cada
+  ocorrência é gravada em `/app/data/ocorrencias/<protocolo>/` (JSON + mídias).
+  Sem volume, os registros se perdem a cada deploy.
+
+Limites: 6 fotos de até 8 MB, 1 vídeo de até 60 MB, 1 áudio de até 2 min e
+10 envios por hora por IP. As mídias e os dados de contato só são acessíveis
+pelo painel; a consulta pública mostra apenas a situação.
+
 ## Estrutura de dados
 
 O contrato dos serviços (`id`, `titulo`, `descricao`, `icone`, `url`) foi

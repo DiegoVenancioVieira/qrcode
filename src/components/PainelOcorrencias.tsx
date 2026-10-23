@@ -15,8 +15,11 @@ const CORES: Record<string, string> = {
   nao_procede: "bg-slate-200 text-slate-700",
 };
 
+/** Neutraliza fórmulas (=, +, -, @) vindas do cidadão ao abrir no Excel. */
+const celula = (c: string) => `"${(/^[=+\-@\t\r]/.test(c) ? `'${c}` : c).replace(/"/g, '""')}"`;
+
 function csv(linhas: string[][]) {
-  return linhas.map((l) => l.map((c) => `"${c.replace(/"/g, '""')}"`).join(";")).join("\n");
+  return linhas.map((l) => l.map(celula).join(";")).join("\n");
 }
 
 export default function PainelOcorrencias({

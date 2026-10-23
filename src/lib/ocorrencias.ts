@@ -59,6 +59,10 @@ export const LIMITES = {
   descricao: 2000,
 };
 
+/** Teto do corpo da requisição inteira, conferido antes de ler o multipart. */
+export const LIMITE_REQUISICAO =
+  LIMITES.fotos * LIMITES.fotoBytes + LIMITES.videoBytes + LIMITES.audioBytes + 1024 * 1024;
+
 const MIME_EXT: Record<string, { tipo: Midia["tipo"]; ext: string }> = {
   "image/jpeg": { tipo: "foto", ext: "jpg" },
   "image/png": { tipo: "foto", ext: "png" },
@@ -119,9 +123,22 @@ export async function criarOcorrencia(
   arquivos: { mime: string; conteudo: Buffer }[],
 ): Promise<Ocorrencia> {
   const agora = new Date();
-  const protocolo = novoProtocolo(agora);
-  const dir = pasta(protocolo);
-  await mkdir(dir, { recursive: true });
+  await mkdir(raiz(), { recursive: true });
+
+  // Reserva o protocolo criando a pasta de forma exclusiva: em caso de
+  // colisão (EEXIST), sorteia outro em vez de sobrescrever um registro.
+  let protocolo = "";
+  let dir = "";
+  for (let tentativa = 0; ; tentativa++) {
+    protocolo = novoProtocolo(agora);
+    dir = pasta(protocolo);
+    try {
+      await mkdir(dir);
+      break;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "EEXIST" || tentativa >= 4) throw e;
+    }
+  }
 
   const midias: Midia[] = [];
   for (const [i, arq] of arquivos.entries()) {

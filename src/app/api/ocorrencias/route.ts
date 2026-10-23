@@ -4,6 +4,7 @@ import {
   classificarMidia,
   criarOcorrencia,
   excedeuLimite,
+  LIMITE_REQUISICAO,
   LIMITES,
   visaoPublica,
 } from "@/lib/ocorrencias";
@@ -26,6 +27,13 @@ export async function POST(request: Request) {
   if (excedeuLimite(clientIp(request.headers))) {
     return erro("Muitos registros em pouco tempo. Tente novamente mais tarde.", 429);
   }
+
+  // Recusa corpos grandes antes de o formData() ler tudo para a memória.
+  const tamanho = Number(request.headers.get("content-length"));
+  if (!Number.isFinite(tamanho) || tamanho <= 0) {
+    return erro("Envio sem tamanho declarado.", 411);
+  }
+  if (tamanho > LIMITE_REQUISICAO) return erro("Envio grande demais.", 413);
 
   let form: FormData;
   try {

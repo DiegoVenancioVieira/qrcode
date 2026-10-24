@@ -59,6 +59,12 @@ COPY --from=builder /app/public ./public
 # Garante que o CSS (Tailwind) e os chunks JS estáticos sejam servidos pelo Next.js
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Ocorrências registradas pelos cidadãos (JSON + fotos/vídeos/áudios).
+# No Coolify, monte um volume persistente em /app/data.
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+ENV DATA_DIR=/app/data
+VOLUME ["/app/data"]
+
 USER nextjs
 
 EXPOSE 3000
